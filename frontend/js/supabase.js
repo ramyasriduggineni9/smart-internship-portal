@@ -1,83 +1,493 @@
-// Replace these two placeholders with your Supabase Project URL and Publishable key.
-// Never put your Supabase Secret/service_role key in this file.
+/**
+ * Supabase Authentication & Profile Integration
+ * Smart Internship Portal - Matrusri Engineering College CSE Team D07
+ */
+
+// Supabase Configuration
 const SUPABASE_URL = "https://jbjfbczsxezptvhswfmm.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_QhEWhEnwiVutvWyR983O0w_itQJZaWQ";
 
 (() => {
- const gate=document.getElementById('authGate');
- const authForm=document.getElementById('authForm');
- const authMessage=document.getElementById('authMessage');
- const authToggle=document.getElementById('authToggle');
- const authSubmit=document.getElementById('authSubmit');
- const signupNameWrap=document.getElementById('signupNameWrap');
- const profilePanel=document.getElementById('profilePanel');
- const profileMessage=document.getElementById('profileMessage');
- let isSignup=false, client=null, currentUser=null;
- const say=(el,msg)=>{el.textContent=msg||''};
- const configured=()=>SUPABASE_URL.startsWith('https://') && SUPABASE_PUBLISHABLE_KEY.length>20 && !SUPABASE_URL.includes('PASTE_') && !SUPABASE_PUBLISHABLE_KEY.includes('PASTE_');
- function showApp(){gate.hidden=true;document.getElementById('profileOpen').hidden=false;document.getElementById('signOutBtn').hidden=false;}
- function showAuth(){gate.hidden=false;document.getElementById('profileOpen').hidden=true;document.getElementById('signOutBtn').hidden=true;}
- async function loadProfile(){
-  const {data,error}=await client.from('students').select('*').eq('user_id',currentUser.id).maybeSingle();
-  if(error){console.error(error);toast('Could not load profile. Check students table policies.');return;}
-  document.getElementById('pfName').value=data?.full_name||currentUser.user_metadata?.full_name||'';
-  document.getElementById('pfEmail').value=currentUser.email||'';
-  document.getElementById('pfCollege').value=data?.college||'';
-  document.getElementById('pfDepartment').value=data?.department||'CSE';
-  document.getElementById('pfYear').value=data?.graduation_year||new Date().getFullYear()+3;
-  if(data?.full_name) S.student.name=data.full_name;
-  if(data?.full_name) S.resume=S.resume.replace(/^.*$/m,data.full_name);
-  if(!data?.college || !data?.department || !data?.graduation_year){profilePanel.classList.add('open');profilePanel.setAttribute('aria-hidden','false');}
- }
- async function handleSession(session){
-  if(!session?.user){currentUser=null;showAuth();return;}
-  currentUser=session.user;showApp();await loadProfile();
- }
- authToggle.addEventListener('click',()=>{
-  isSignup=!isSignup;signupNameWrap.hidden=!isSignup;
-  document.getElementById('authTitle').textContent=isSignup?'Create your student account':'Welcome to Smart Internship Portal';
-  document.getElementById('authIntro').textContent=isSignup?'Use your college email if available. You may need to confirm your email before logging in.':'Log in to access your student dashboard.';
-  authSubmit.textContent=isSignup?'Create account':'Log in';authToggle.textContent=isSignup?'Back to login':'Create account';
-  document.getElementById('authPassword').autocomplete=isSignup?'new-password':'current-password';say(authMessage,'');
- });
- authForm.addEventListener('submit',async e=>{
-  e.preventDefault();say(authMessage,'');
-  if(!client){say(authMessage,'Supabase is not configured. Add your Project URL and Publishable key in the code first.');return;}
-  const email=document.getElementById('authEmail').value.trim();
-  const password=document.getElementById('authPassword').value;
-  authSubmit.disabled=true;
-  try{
-   if(isSignup){
-    const full_name=document.getElementById('authName').value.trim();
-    if(!full_name){say(authMessage,'Enter your full name.');return;}
-    const {data,error}=await client.auth.signUp({email,password,options:{data:{full_name}}});
-    if(error) throw error;
-    if(data.session){await handleSession(data.session);toast('Account created. Complete your profile.');}
-    else say(authMessage,'Account created. Check your email to confirm it, then log in.');
-   }else{
-    const {data,error}=await client.auth.signInWithPassword({email,password});
-    if(error) throw error;
-    await handleSession(data.session);toast('Logged in successfully.');
-   }
-  }catch(err){say(authMessage,err.message||'Authentication failed.');}
-  finally{authSubmit.disabled=false;}
- });
- document.getElementById('profileOpen').addEventListener('click',()=>{profilePanel.classList.add('open');profilePanel.setAttribute('aria-hidden','false');});
- document.getElementById('profileClose').addEventListener('click',()=>{profilePanel.classList.remove('open');profilePanel.setAttribute('aria-hidden','true');});
- profilePanel.addEventListener('click',e=>{if(e.target===profilePanel){profilePanel.classList.remove('open');profilePanel.setAttribute('aria-hidden','true');}});
- document.getElementById('profileForm').addEventListener('submit',async e=>{
-  e.preventDefault();say(profileMessage,'');if(!currentUser)return;
-  const row={user_id:currentUser.id,full_name:document.getElementById('pfName').value.trim(),email:currentUser.email,college:document.getElementById('pfCollege').value.trim(),department:document.getElementById('pfDepartment').value.trim(),graduation_year:Number(document.getElementById('pfYear').value)};
-  const {error}=await client.from('students').upsert(row,{onConflict:'user_id'});
-  if(error){say(profileMessage,error.message);return;}
-  S.student.name=row.full_name;toast('Student profile saved.');profilePanel.classList.remove('open');profilePanel.setAttribute('aria-hidden','true');
- });
- document.getElementById('signOutBtn').addEventListener('click',async()=>{const {error}=await client.auth.signOut();if(error){toast(error.message);return;}showAuth();toast('Signed out.');});
- async function init(){
-  if(!configured() || !window.supabase){say(authMessage,'Website setup needed: add your Supabase Project URL and Publishable key to index.html.');return;}
-  client=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
-  const {data:{session}}=await client.auth.getSession();await handleSession(session);
-  client.auth.onAuthStateChange((_event,session)=>{handleSession(session);});
- }
- init();
+  // Primary page containers
+  const welcomePage = document.getElementById('welcomePage');
+  const dashboardApp = document.getElementById('dashboardApp');
+
+  // Modals
+  const loginModal = document.getElementById('loginModal');
+  const signupModal = document.getElementById('signupModal');
+  const forgotModal = document.getElementById('forgotModal');
+  const profilePanel = document.getElementById('profilePanel');
+
+  // Forms
+  const loginForm = document.getElementById('loginForm');
+  const signupForm = document.getElementById('signupForm');
+  const forgotForm = document.getElementById('forgotForm');
+  const profileForm = document.getElementById('profileForm');
+
+  // Messages
+  const loginMsg = document.getElementById('loginMsg');
+  const signupMsg = document.getElementById('signupMsg');
+  const forgotMsg = document.getElementById('forgotMsg');
+  const profileMessage = document.getElementById('profileMessage');
+
+  // Buttons & Controls
+  const loginSubmitBtn = document.getElementById('loginSubmitBtn');
+  const signupSubmitBtn = document.getElementById('signupSubmitBtn');
+  const forgotSubmitBtn = document.getElementById('forgotSubmitBtn');
+  const signOutBtn = document.getElementById('signOutBtn');
+  const profileOpenBtn = document.getElementById('profileOpen');
+  const profileCloseBtn = document.getElementById('profileClose');
+
+  let client = null;
+  let currentUser = null;
+
+  const say = (el, msg, isError = true) => {
+    if (!el) return;
+    el.textContent = msg || '';
+    el.className = isError ? 'modal-msg auth-error' : 'modal-msg auth-success';
+  };
+
+  const isConfigured = () => {
+    return SUPABASE_URL.startsWith('https://') &&
+           SUPABASE_PUBLISHABLE_KEY.length > 20 &&
+           !SUPABASE_URL.includes('PASTE_') &&
+           !SUPABASE_PUBLISHABLE_KEY.includes('PASTE_');
+  };
+
+  /* ---------- Modal Controls ---------- */
+  function openModal(modal) {
+    closeAllModals();
+    if (!modal) return;
+    modal.hidden = false;
+    document.body.style.overflow = 'hidden';
+    const firstInput = modal.querySelector('input');
+    if (firstInput) setTimeout(() => firstInput.focus(), 80);
+  }
+
+  function closeModal(modal) {
+    if (!modal) return;
+    modal.hidden = true;
+    document.body.style.overflow = '';
+    // Clear status messages
+    if (loginMsg) say(loginMsg, '');
+    if (signupMsg) say(signupMsg, '');
+    if (forgotMsg) say(forgotMsg, '');
+  }
+
+  function closeAllModals() {
+    [loginModal, signupModal, forgotModal, profilePanel].forEach(m => {
+      if (m) m.hidden = true;
+    });
+    document.body.style.overflow = '';
+  }
+
+  /* ---------- Page View Transitions ---------- */
+  function showDashboard() {
+    closeAllModals();
+    if (welcomePage) welcomePage.hidden = true;
+    if (dashboardApp) dashboardApp.hidden = false;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (typeof window.renderDashboard === 'function') {
+      window.renderDashboard();
+    }
+  }
+
+  function showWelcome() {
+    closeAllModals();
+    if (dashboardApp) dashboardApp.hidden = true;
+    if (welcomePage) welcomePage.hidden = false;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  /* ---------- Profile Loading & Sync ---------- */
+  async function loadProfile() {
+    if (!client || !currentUser) return;
+    try {
+      const { data, error } = await client
+        .from('students')
+        .select('*')
+        .eq('user_id', currentUser.id)
+        .maybeSingle();
+
+      if (error) {
+        console.warn('Could not query students table:', error.message);
+      }
+
+      const fullName = data?.full_name || currentUser.user_metadata?.full_name || 'Duggineni Ramya';
+      const email = currentUser.email || 'ramya.d@student.matrusri.edu.in';
+      const college = data?.college || currentUser.user_metadata?.college || 'Matrusri Engineering College';
+      const department = data?.department || currentUser.user_metadata?.department || 'CSE';
+      const gradYear = data?.graduation_year || currentUser.user_metadata?.graduation_year || 2027;
+
+      // Populate profile dialog inputs
+      const pfName = document.getElementById('pfName');
+      const pfEmail = document.getElementById('pfEmail');
+      const pfCollege = document.getElementById('pfCollege');
+      const pfDepartment = document.getElementById('pfDepartment');
+      const pfYear = document.getElementById('pfYear');
+
+      if (pfName) pfName.value = fullName;
+      if (pfEmail) pfEmail.value = email;
+      if (pfCollege) pfCollege.value = college;
+      if (pfDepartment) pfDepartment.value = department;
+      if (pfYear) pfYear.value = gradYear;
+
+      // Sync with global application state S if present
+      if (window.S && window.S.student) {
+        window.S.student.name = fullName;
+        if (window.S.resume) {
+          window.S.resume = window.S.resume.replace(/^.*$/m, fullName.toUpperCase());
+        }
+      }
+
+      if (typeof window.renderDashboard === 'function') {
+        window.renderDashboard();
+      }
+    } catch (err) {
+      console.error('loadProfile error:', err);
+    }
+  }
+
+  /* ---------- Session Handler ---------- */
+  async function handleSession(session) {
+    if (!session?.user) {
+      currentUser = null;
+      showWelcome();
+      return;
+    }
+    currentUser = session.user;
+    showDashboard();
+    await loadProfile();
+  }
+
+  /* ---------- Authentication Action Handlers ---------- */
+
+  // 1. Log In Form Submit
+  if (loginForm) {
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      say(loginMsg, '');
+
+      if (!client) {
+        say(loginMsg, 'Supabase client is not initialized. Please check network connectivity.');
+        return;
+      }
+
+      const email = document.getElementById('loginEmail')?.value.trim();
+      const password = document.getElementById('loginPassword')?.value;
+
+      if (!email || !password) {
+        say(loginMsg, 'Please enter both email and password.');
+        return;
+      }
+
+      loginSubmitBtn.disabled = true;
+      loginSubmitBtn.textContent = 'Logging in...';
+
+      try {
+        const { data, error } = await client.auth.signInWithPassword({ email, password });
+        if (error) {
+          if (error.message.includes('Invalid login credentials')) {
+            throw new Error('Invalid email or password. Please verify your credentials or create a new account.');
+          } else if (error.message.includes('Email not confirmed')) {
+            throw new Error('Your email is not confirmed yet. Please check your inbox for the verification link.');
+          }
+          throw error;
+        }
+
+        if (data.session) {
+          await handleSession(data.session);
+          if (typeof window.showToast === 'function') {
+            window.showToast('Logged in successfully. Welcome to Smart Internship Portal!');
+          }
+        }
+      } catch (err) {
+        say(loginMsg, err.message || 'Login failed. Please try again.');
+      } finally {
+        loginSubmitBtn.disabled = false;
+        loginSubmitBtn.textContent = 'Log In';
+      }
+    });
+  }
+
+  // 2. Create Account Form Submit
+  if (signupForm) {
+    signupForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      say(signupMsg, '');
+
+      if (!client) {
+        say(signupMsg, 'Supabase client is not initialized.');
+        return;
+      }
+
+      const fullName = document.getElementById('signupFullName')?.value.trim();
+      const email = document.getElementById('signupEmail')?.value.trim();
+      const password = document.getElementById('signupPassword')?.value;
+      const confirmPassword = document.getElementById('signupConfirmPassword')?.value;
+      const college = document.getElementById('signupCollege')?.value.trim();
+      const department = document.getElementById('signupDepartment')?.value;
+      const graduationYear = document.getElementById('signupGradYear')?.value;
+
+      if (!fullName || !email || !password || !college || !department || !graduationYear) {
+        say(signupMsg, 'Please fill in all required fields.');
+        return;
+      }
+
+      if (password.length < 6) {
+        say(signupMsg, 'Password must be at least 6 characters long.');
+        return;
+      }
+
+      if (password !== confirmPassword) {
+        say(signupMsg, 'Passwords do not match. Please verify and re-type.');
+        return;
+      }
+
+      signupSubmitBtn.disabled = true;
+      signupSubmitBtn.textContent = 'Creating account...';
+
+      try {
+        const metadata = {
+          full_name: fullName,
+          college: college,
+          department: department,
+          graduation_year: Number(graduationYear)
+        };
+
+        const { data, error } = await client.auth.signUp({
+          email,
+          password,
+          options: { data: metadata }
+        });
+
+        if (error) throw error;
+
+        // Attempt to upsert student record in the students table
+        if (data.user) {
+          try {
+            await client.from('students').upsert({
+              user_id: data.user.id,
+              full_name: fullName,
+              email: email,
+              college: college,
+              department: department,
+              graduation_year: Number(graduationYear),
+              cgpa: 8.20,
+              skills: ['Python', 'SQL', 'HTML/CSS', 'Git', 'Flask'],
+              completed_courses: ['DBMS', 'Operating Systems', 'Data Structures', 'Web Technologies', 'Python Programming']
+            }, { onConflict: 'user_id' });
+          } catch (upsertErr) {
+            console.warn('Initial student profile upsert deferred:', upsertErr);
+          }
+        }
+
+        if (data.session) {
+          await handleSession(data.session);
+          if (typeof window.showToast === 'function') {
+            window.showToast('Account created successfully! Welcome aboard.');
+          }
+        } else {
+          say(signupMsg, 'Account created! Please check your email inbox to verify your address, then log in.', false);
+          setTimeout(() => {
+            openModal(loginModal);
+            const loginEmailInput = document.getElementById('loginEmail');
+            if (loginEmailInput) loginEmailInput.value = email;
+            say(loginMsg, 'Account created! Please check your email or log in.', false);
+          }, 2400);
+        }
+      } catch (err) {
+        say(signupMsg, err.message || 'Account registration failed.');
+      } finally {
+        signupSubmitBtn.disabled = false;
+        signupSubmitBtn.textContent = 'Create Account';
+      }
+    });
+  }
+
+  // 3. Forgot Password Form Submit
+  if (forgotForm) {
+    forgotForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      say(forgotMsg, '');
+
+      const email = document.getElementById('forgotEmail')?.value.trim();
+      if (!email) {
+        say(forgotMsg, 'Please enter your registered email address.');
+        return;
+      }
+
+      forgotSubmitBtn.disabled = true;
+      forgotSubmitBtn.textContent = 'Sending...';
+
+      try {
+        const { error } = await client.auth.resetPasswordForEmail(email, {
+          redirectTo: window.location.origin
+        });
+        if (error) throw error;
+        say(forgotMsg, 'Password reset link sent! Check your inbox.', false);
+      } catch (err) {
+        say(forgotMsg, err.message || 'Unable to send reset email.');
+      } finally {
+        forgotSubmitBtn.disabled = false;
+        forgotSubmitBtn.textContent = 'Send Reset Link';
+      }
+    });
+  }
+
+  // 4. Student Profile Modal Form Submit
+  if (profileForm) {
+    profileForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      say(profileMessage, '');
+      if (!currentUser || !client) return;
+
+      const fullName = document.getElementById('pfName')?.value.trim();
+      const college = document.getElementById('pfCollege')?.value.trim();
+      const department = document.getElementById('pfDepartment')?.value.trim();
+      const graduationYear = Number(document.getElementById('pfYear')?.value);
+
+      const row = {
+        user_id: currentUser.id,
+        full_name: fullName,
+        email: currentUser.email,
+        college,
+        department,
+        graduation_year: graduationYear
+      };
+
+      try {
+        const { error } = await client.from('students').upsert(row, { onConflict: 'user_id' });
+        if (error) throw error;
+
+        if (window.S && window.S.student) {
+          window.S.student.name = fullName;
+          if (window.S.resume) {
+            window.S.resume = window.S.resume.replace(/^.*$/m, fullName.toUpperCase());
+          }
+        }
+
+        if (typeof window.showToast === 'function') {
+          window.showToast('Student profile saved successfully.');
+        }
+
+        closeModal(profilePanel);
+
+        if (typeof window.renderDashboard === 'function') {
+          window.renderDashboard();
+        }
+      } catch (err) {
+        say(profileMessage, err.message || 'Error saving profile.');
+      }
+    });
+  }
+
+  // 5. Sign Out
+  if (signOutBtn) {
+    signOutBtn.addEventListener('click', async () => {
+      try {
+        if (client) {
+          await client.auth.signOut();
+        }
+      } catch (err) {
+        console.warn('SignOut warning:', err);
+      } finally {
+        currentUser = null;
+        showWelcome();
+        if (typeof window.showToast === 'function') {
+          window.showToast('Signed out successfully.');
+        }
+      }
+    });
+  }
+
+  // 6. Profile Open & Close buttons
+  if (profileOpenBtn) {
+    profileOpenBtn.addEventListener('click', () => {
+      openModal(profilePanel);
+    });
+  }
+
+  if (profileCloseBtn) {
+    profileCloseBtn.addEventListener('click', () => {
+      closeModal(profilePanel);
+    });
+  }
+
+  /* ---------- Modal Triggers on Welcome Page ---------- */
+  document.addEventListener('click', (e) => {
+    // Open Login Modal
+    if (e.target.closest('#navLoginBtn, #heroLoginBtn, #ctaLoginBtn, #switchToLogin, #forgotBackToLogin')) {
+      e.preventDefault();
+      openModal(loginModal);
+      return;
+    }
+
+    // Open Sign Up Modal
+    if (e.target.closest('#navSignupBtn, #heroGetStartedBtn, #ctaGetStartedBtn, #switchToSignup')) {
+      e.preventDefault();
+      openModal(signupModal);
+      return;
+    }
+
+    // Open Forgot Password Modal
+    if (e.target.closest('#openForgotBtn')) {
+      e.preventDefault();
+      openModal(forgotModal);
+      return;
+    }
+
+    // Close Modals when clicking close button [data-close-modal]
+    if (e.target.closest('[data-close-modal]')) {
+      closeAllModals();
+      return;
+    }
+
+    // Close Modals when clicking outside dialog on backdrop
+    if (e.target.classList.contains('modal-backdrop')) {
+      closeAllModals();
+      return;
+    }
+  });
+
+  // Close modals on Escape key
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      closeAllModals();
+    }
+  });
+
+  /* ---------- Global Exports & Initialization ---------- */
+  window.openLoginModal = () => openModal(loginModal);
+  window.openSignupModal = () => openModal(signupModal);
+  window.showDashboard = showDashboard;
+  window.showWelcome = showWelcome;
+
+  async function init() {
+    if (!isConfigured() || !window.supabase) {
+      console.warn('Supabase not configured or library missing. Running in demo mode.');
+      showWelcome();
+      return;
+    }
+
+    try {
+      client = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+      const { data: { session } } = await client.auth.getSession();
+      await handleSession(session);
+
+      client.auth.onAuthStateChange((_event, session) => {
+        handleSession(session);
+      });
+    } catch (err) {
+      console.error('Initialization error:', err);
+      showWelcome();
+    }
+  }
+
+  // Run on DOM ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
 })();

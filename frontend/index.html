@@ -1,603 +1,616 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<style>:root{color-scheme:light}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
-<title>Smart Internship Portal</title>
-<meta name="claude:viewport-fit-sides" content="cover">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Caveat:wght@600&display=swap">
-<style>
-/* Layout: sticky top bar with role switcher, left task nav, one working pane. Utilitarian app UI, teal on cool neutral. */
-:root{
-  --bg:#f3f6f5; --surface:#ffffff; --ink:#14211f; --muted:#586a66; --line:#d8e1de;
-  --accent:#0b6b63; --accent-ink:#ffffff; --accent-soft:#dcefec;
-  --warn:#9a5b06; --warn-soft:#fcefd6; --bad:#b3261e; --bad-soft:#fbe4e1; --good:#1b7a3d; --good-soft:#def3e4;
-  --f-display:"Bricolage Grotesque","IBM Plex Sans",system-ui,sans-serif;
-  --f-body:"IBM Plex Sans",system-ui,sans-serif;
-  --f-mono:"IBM Plex Mono",ui-monospace,monospace;
-}
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
-  --bg:#0d1514; --surface:#152120; --ink:#e6efed; --muted:#93a6a1; --line:#263634;
-  --accent:#3cc2b4; --accent-ink:#04201d; --accent-soft:#143a36;
-  --warn:#f0b45a; --warn-soft:#3a2c12; --bad:#ff8a80; --bad-soft:#3d1b18; --good:#6fd392; --good-soft:#163a24; color-scheme:dark}}
-:root[data-theme="dark"]{
-  --bg:#0d1514; --surface:#152120; --ink:#e6efed; --muted:#93a6a1; --line:#263634;
-  --accent:#3cc2b4; --accent-ink:#04201d; --accent-soft:#143a36;
-  --warn:#f0b45a; --warn-soft:#3a2c12; --bad:#ff8a80; --bad-soft:#3d1b18; --good:#6fd392; --good-soft:#163a24; color-scheme:dark}
-*{box-sizing:border-box}
-body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:14px;line-height:1.5}
-h1,h2,h3{font-family:var(--f-display);margin:0;text-wrap:balance;line-height:1.2}
-h2{font-size:22px} h3{font-size:16px}
-p{margin:0}
-button,input,select,textarea{font:inherit;color:inherit}
-:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--surface);border-bottom:1px solid var(--line);
-  padding-block:10px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
-body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--surface)}
-.top-in{display:flex;gap:12px 20px;align-items:center;justify-content:space-between;flex-wrap:wrap;max-width:1240px;margin:0 auto}
-.brand{display:flex;flex-direction:column;min-width:0}
-.brand b{font-family:var(--f-display);font-size:18px}
-.brand span{font-size:12px;color:var(--muted)}
-.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--bg)}
-.seg button{border:0;background:transparent;padding:7px 14px;cursor:pointer;color:var(--muted);font-weight:500}
-.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
-.shell{max-width:1240px;margin:0 auto;display:grid;grid-template-columns:210px minmax(0,1fr);gap:20px;
-  padding-block:20px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
-nav{display:flex;flex-direction:column;gap:2px;align-self:start;position:sticky;top:calc(70px + env(safe-area-inset-top,0px))}
-nav button{display:flex;justify-content:space-between;align-items:center;gap:8px;text-align:left;border:0;background:transparent;padding:9px 12px;border-radius:8px;cursor:pointer;color:var(--muted);font-weight:500}
-nav button:hover{background:var(--accent-soft);color:var(--ink)}
-nav button[aria-current="page"]{background:var(--accent-soft);color:var(--accent);font-weight:600}
-nav .dot{background:var(--bad);color:#fff;border-radius:99px;font-size:11px;min-width:18px;text-align:center;padding:0 5px}
-main{min-width:0;display:flex;flex-direction:column;gap:16px}
-.head{display:flex;justify-content:space-between;gap:12px;align-items:flex-end;flex-wrap:wrap}
-.head p{color:var(--muted);max-width:62ch}
-.panel{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px;min-width:0}
-.panel>h3{margin-bottom:10px}
-.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:16px}
-.row{display:flex;gap:8px 12px;align-items:center;flex-wrap:wrap}
-.spread{justify-content:space-between}
-.muted{color:var(--muted)} .small{font-size:12px} .mono{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
-.btn{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:7px 12px;cursor:pointer;font-weight:500}
-.btn:hover{border-color:var(--accent)}
-.btn.pri{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
-.btn.pri:hover{filter:brightness(1.08)}
-.btn:disabled{opacity:.45;cursor:not-allowed}
-.btn.sm{padding:3px 9px;font-size:12px}
-.chip{display:inline-flex;align-items:center;gap:5px;border-radius:99px;padding:2px 10px;font-size:12px;border:1px solid var(--line);background:var(--bg);white-space:nowrap}
-.chip.ok{background:var(--good-soft);color:var(--good);border-color:transparent}
-.chip.rel{background:var(--warn-soft);color:var(--warn);border-color:transparent}
-.chip.gap{color:var(--muted);border-style:dashed}
-.chip.bad{background:var(--bad-soft);color:var(--bad);border-color:transparent}
-.chip.acc{background:var(--accent-soft);color:var(--accent);border-color:transparent}
-.chip button{border:0;background:none;cursor:pointer;color:inherit;padding:0 0 0 2px;font-size:14px;line-height:1}
-.chips{display:flex;gap:6px;flex-wrap:wrap}
-label{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted);font-weight:500}
-input,select,textarea{border:1px solid var(--line);background:var(--bg);border-radius:8px;padding:7px 10px;color:var(--ink);min-width:0;width:100%}
-textarea{min-height:150px;resize:vertical;font-family:var(--f-mono);font-size:12.5px}
-.form{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,200px),1fr));gap:12px}
-.job{display:flex;flex-direction:column;gap:10px}
-.job-top{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
-.job h3{font-size:17px}
-.score{display:flex;flex-direction:column;align-items:flex-end;min-width:90px}
-.score b{font-family:var(--f-mono);font-size:22px;color:var(--accent)}
-.bar{height:6px;background:var(--line);border-radius:9px;overflow:hidden;width:100%}
-.bar i{display:block;height:100%;background:var(--accent)}
-.bar.kw i{background:var(--muted)}
-.why{font-size:12.5px;color:var(--muted);display:flex;flex-direction:column;gap:2px}
-.note{border-radius:8px;padding:9px 12px;font-size:13px;background:var(--accent-soft);color:var(--ink)}
-.note.warn{background:var(--warn-soft)} .note.bad{background:var(--bad-soft)} .note.good{background:var(--good-soft)}
-.kan{display:grid;grid-template-columns:repeat(5,minmax(170px,1fr));gap:10px;overflow-x:auto;padding-bottom:6px}
-.col{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px;display:flex;flex-direction:column;gap:8px;min-height:140px}
-.col h4{margin:0;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);display:flex;justify-content:space-between}
-.card{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:9px 10px;display:flex;flex-direction:column;gap:6px;font-size:13px}
-.card.me{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent) inset}
-table{width:100%;border-collapse:collapse;font-size:13px}
-th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line)}
-th{font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600}
-.tw{overflow-x:auto}
-.steps{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
-.step{display:flex;flex-direction:column;gap:2px;border:1px solid var(--line);border-radius:8px;padding:8px 12px;min-width:150px;background:var(--bg)}
-.step.done{background:var(--good-soft);border-color:transparent}
-.step.next{border-color:var(--accent);background:var(--accent-soft)}
-.sig{font-family:"Caveat",cursive;font-size:24px;line-height:1;color:var(--accent)}
-.chat{display:flex;flex-direction:column;gap:8px;max-height:420px;overflow-y:auto;padding:4px}
-.msg{padding:8px 12px;border-radius:10px;max-width:min(560px,92%);white-space:pre-wrap}
-.msg.u{align-self:flex-end;background:var(--accent);color:var(--accent-ink)}
-.msg.b{align-self:flex-start;background:var(--bg);border:1px solid var(--line)}
-.stat{display:flex;flex-direction:column}
-.stat b{font-family:var(--f-mono);font-size:26px}
-.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px}
-.hbar{display:grid;grid-template-columns:130px minmax(0,1fr) 28px;gap:8px;align-items:center;font-size:13px}
-svg text{fill:var(--ink);font-family:var(--f-body);font-size:11px}
-.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(18px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:9px 16px;border-radius:8px;z-index:20;font-size:13px;max-width:92vw}
-@media (max-width:760px){
-  .shell{grid-template-columns:minmax(0,1fr);gap:12px}
-  nav{flex-direction:row;overflow-x:auto;position:static;padding-bottom:4px}
-  nav button{white-space:nowrap}
-  .hbar{grid-template-columns:100px minmax(0,1fr) 28px}
-}
-@media (prefers-reduced-motion:no-preference){.bar i{transition:width .3s}}
-</style>
-
-
-<style>
-#authGate{position:fixed;inset:0;z-index:1000;background:rgba(10,24,22,.72);display:grid;place-items:center;padding:18px}
-#authCard{width:min(100%,460px);max-height:92vh;overflow:auto;background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:16px;padding:24px;box-shadow:0 20px 70px #0005}
-#authCard h2{margin-bottom:8px}#authCard p{color:var(--muted);margin-bottom:16px}
-#authCard label,#profilePanel label{display:block;font-weight:600;margin:12px 0 5px}
-#authCard input,#profilePanel input{width:100%;padding:11px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink)}
-.auth-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
-.auth-error{color:var(--bad)!important;min-height:20px;font-size:13px;margin-top:10px!important}
-#profilePanel{position:fixed;inset:0;z-index:999;background:#0008;display:none;place-items:center;padding:18px}
-#profilePanel.open{display:grid}#profilePanel .profile-card{width:min(100%,520px);max-height:92vh;overflow:auto;background:var(--surface);color:var(--ink);border-radius:16px;padding:24px;border:1px solid var(--line)}
-#accountControls{display:flex;gap:8px;align-items:center}
-#accountControls button{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:8px;padding:8px 11px;cursor:pointer}
-@media(max-width:600px){#authCard,#profilePanel .profile-card{padding:18px}}
-</style>
-
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Smart Internship Portal | Matrusri Engineering College</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Caveat:wght@600&display=swap">
+  <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
-<header class="top"><div class="top-in">
-  <div class="brand"><b>Smart Internship Portal</b><span>Matrusri Engineering College · CSE · Team D07 · interactive prototype with sample data</span></div>
-  <div id="accountControls"><button id="profileOpen" type="button" hidden>My profile</button><button id="signOutBtn" type="button" hidden>Sign out</button><div class="seg" role="group" aria-label="View as" id="roles"></div></div>
-</div></header>
-<div class="shell"><nav id="nav" aria-label="Sections"></nav><main id="main"></main></div>
-<div class="toast" id="toast" hidden></div>
+
+  <!-- ======================================================================
+       1. WELCOME / LANDING PAGE
+       ====================================================================== -->
+  <div id="welcomePage">
+    <!-- Top Navigation Bar -->
+    <header class="welcome-nav">
+      <div class="welcome-nav-container">
+        <a href="#welcomePage" class="welcome-brand">
+          <div class="brand-icon-wrap">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
+              <path d="M6 12v5c3 3 9 3 12 0v-5"/>
+            </svg>
+          </div>
+          <div>
+            <span class="brand-title">Smart Internship Portal</span>
+            <span class="brand-subtitle">Matrusri Engineering College · CSE</span>
+          </div>
+        </a>
+
+        <nav class="welcome-nav-links" aria-label="Landing Page Navigation">
+          <a href="#how-it-works">How It Works</a>
+          <a href="#features">Features</a>
+          <a href="#about">About</a>
+          <a href="#benefits">Benefits</a>
+        </nav>
+
+        <div class="welcome-nav-actions">
+          <button type="button" class="btn btn-outline" id="navLoginBtn">Log In</button>
+          <button type="button" class="btn btn-primary" id="navSignupBtn">Create Account</button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+      <div class="hero-content">
+        <div class="hero-badge">
+          <span class="badge-dot"></span>
+          AI Skill-Graph Matching · IEEE Research Foundation
+        </div>
+        <h1 class="hero-title">
+          Build Your Skills.<br>
+          <span class="accent-text">Discover Opportunities.</span><br>
+          Shape Your Career.
+        </h1>
+        <p class="hero-desc">
+          Your one-stop platform connecting students, academic institutions and industries through intelligent skill mapping, internship opportunities and career development.
+        </p>
+        <div class="hero-cta-group">
+          <button type="button" class="btn btn-primary btn-lg" id="heroGetStartedBtn">Get Started Free →</button>
+          <button type="button" class="btn btn-secondary btn-lg" id="heroLoginBtn">Student Login</button>
+          <a href="#how-it-works" class="hero-link">See How It Works ↓</a>
+        </div>
+        <div class="hero-pills">
+          <span class="pill">✓ Semantic Skill Matching</span>
+          <span class="pill">✓ Verified MCA Employers</span>
+          <span class="pill">✓ Real-time Kanban</span>
+          <span class="pill">✓ Digital NOC E-Signatures</span>
+          <span class="pill">✓ Academic Credit Transfer</span>
+        </div>
+      </div>
+
+      <!-- Hero Visual Live Snapshot Card -->
+      <div class="hero-visual">
+        <div class="hero-card">
+          <div class="card-header-row">
+            <div class="card-title-group">
+              <h4>Knowledge-Graph Skill Match</h4>
+              <span>Candidate vs. Role Proximity</span>
+            </div>
+            <div class="hero-stat-badge">88% Match</div>
+          </div>
+
+          <div class="hero-graph-preview">
+            <div class="hero-nodes-row">
+              <div class="hero-node">Python (Student)</div>
+              <div class="hero-node">Flask</div>
+              <div class="hero-node target">Django (Target)</div>
+            </div>
+            <p class="small muted" style="text-align:center;">
+              Semantic link: <b>Python → Django</b> (80% affinity via Knowledge Graph)
+            </p>
+          </div>
+
+          <div class="hero-kanban-mini">
+            <div class="mini-col">
+              <span>Applied</span>
+              <div class="mini-item">Backend Intern</div>
+            </div>
+            <div class="mini-col">
+              <span>Interview</span>
+              <div class="mini-item highlight">Orbit Digital</div>
+            </div>
+            <div class="mini-col">
+              <span>Credits</span>
+              <div class="mini-item">2 Credits Sync</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- How It Works Section (6 Steps) -->
+    <section id="how-it-works" class="landing-section">
+      <div class="section-header">
+        <span class="section-eyebrow">PORTAL WORKFLOW</span>
+        <h2>How It Works</h2>
+        <p>A structured, paperless 6-step roadmap connecting classroom learning with accredited industry internships.</p>
+      </div>
+
+      <div class="steps-grid">
+        <!-- Step 1 -->
+        <div class="step-card">
+          <div class="step-header">
+            <span class="step-num">Step 01</span>
+            <div class="step-icon">👤</div>
+          </div>
+          <h3>Create Your Account</h3>
+          <p>Students register and create their profiles with academic roll numbers and college credentials.</p>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="step-card">
+          <div class="step-header">
+            <span class="step-num">Step 02</span>
+            <div class="step-icon">🎯</div>
+          </div>
+          <h3>Build Your Profile</h3>
+          <p>Add educational details, verified skills, completed course prerequisites, and certifications.</p>
+        </div>
+
+        <!-- Step 3 -->
+        <div class="step-card">
+          <div class="step-header">
+            <span class="step-num">Step 03</span>
+            <div class="step-icon">🔍</div>
+          </div>
+          <h3>Discover Internships</h3>
+          <p>Explore internship opportunities dynamically ranked by knowledge-graph semantic match scores.</p>
+        </div>
+
+        <!-- Step 4 -->
+        <div class="step-card">
+          <div class="step-header">
+            <span class="step-num">Step 04</span>
+            <div class="step-icon">⚡</div>
+          </div>
+          <h3>Apply for Internships</h3>
+          <p>Automated screening validates CGPA and prerequisite subjects before one-click submission.</p>
+        </div>
+
+        <!-- Step 5 -->
+        <div class="step-card">
+          <div class="step-header">
+            <span class="step-num">Step 05</span>
+            <div class="step-icon">📋</div>
+          </div>
+          <h3>Track Your Progress</h3>
+          <p>Monitor your application status and interview stages in real time on the interactive Kanban board.</p>
+        </div>
+
+        <!-- Step 6 -->
+        <div class="step-card">
+          <div class="step-header">
+            <span class="step-num">Step 06</span>
+            <div class="step-icon">🚀</div>
+          </div>
+          <h3>Build Your Career</h3>
+          <p>Complete 160 internship hours, route digital NOC e-signatures, and transfer credits directly to your gradebook.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Key Features Section -->
+    <section id="features" class="landing-section">
+      <div class="section-header">
+        <span class="section-eyebrow">INTELLIGENT ARCHITECTURE</span>
+        <h2>Key Platform Features</h2>
+        <p>Engineered to eliminate friction, manual paperwork, and application black holes.</p>
+      </div>
+
+      <div class="features-grid">
+        <div class="feature-box">
+          <div class="feature-icon-wrap">🌐</div>
+          <div class="feature-info">
+            <h3>Semantic Skill-Graph Matching</h3>
+            <p>Maps skills into an interconnected knowledge graph, computing transitive affinity beyond rigid literal keyword matches.</p>
+          </div>
+        </div>
+
+        <div class="feature-box">
+          <div class="feature-icon-wrap">🛡️</div>
+          <div class="feature-info">
+            <h3>Automated Eligibility Screener</h3>
+            <p>Instantly verifies academic requirements, minimum CGPA thresholds, and completed departmental course modules.</p>
+          </div>
+        </div>
+
+        <div class="feature-box">
+          <div class="feature-icon-wrap">🏢</div>
+          <div class="feature-info">
+            <h3>Verified Employer Onboarding</h3>
+            <p>Vets corporate MCA 21-character CIN, 15-character GSTIN, and corporate domain emails to eliminate scam or unpaid ghost roles.</p>
+          </div>
+        </div>
+
+        <div class="feature-box">
+          <div class="feature-icon-wrap">📊</div>
+          <div class="feature-info">
+            <h3>Real-Time Kanban Application Tracker</h3>
+            <p>Provides complete transparency on application status across Applied, Under Review, Interview, and Selection columns.</p>
+          </div>
+        </div>
+
+        <div class="feature-box">
+          <div class="feature-icon-wrap">✍️</div>
+          <div class="feature-info">
+            <h3>Digital Workflows & E-Signatures</h3>
+            <p>Sequentially routes digital No Objection Certificates (NOC) across Mentor → HOD → Placement Officer with tamper-evident hashes.</p>
+          </div>
+        </div>
+
+        <div class="feature-box">
+          <div class="feature-icon-wrap">🎓</div>
+          <div class="feature-info">
+            <h3>Automated Academic Credit Transfer</h3>
+            <p>Tracks 160 verified internship hours and pushes employer evaluation scores directly into institutional gradebooks for course CSE-INT.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="landing-section">
+      <div class="section-header">
+        <span class="section-eyebrow">PROJECT INITIATIVE</span>
+        <h2>About Smart Internship Portal</h2>
+        <p>A department-level technical innovation uniting student talent, academic governance, and industry recruiters.</p>
+      </div>
+
+      <div class="about-grid">
+        <div class="about-card">
+          <span class="paper-badge">DEPARTMENT OF CSE</span>
+          <h3>Matrusri Engineering College</h3>
+          <p>
+            An Autonomous Institution affiliated with Osmania University, approved by AICTE, and accredited with NBA and NAAC A+.
+            This project was conceived and designed by <b>Mini Project Team D07</b> to modernize the student internship lifecycle.
+          </p>
+          <div class="team-list">
+            <div class="team-item">
+              <div><b>Ramyasri Duggineni</b></div>
+              <span>1608-24-733-200</span>
+            </div>
+            <div class="team-item">
+              <div><b>Jyothsna Kanugula</b></div>
+              <span>1608-24-733-235</span>
+            </div>
+            <div class="team-item">
+              <div><b>R. Kalyan</b></div>
+              <span>1608-24-733-245</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="about-card">
+          <span class="paper-badge">RESEARCH FOUNDATION</span>
+          <h3>IEEE Base Paper Alignment</h3>
+          <p>
+            The intelligence layer is grounded in the IEEE ICMNWC 2025 research paper:
+            <i>"Skill-Based Recommender System for Internship and Industry Hiring using Knowledge Graphs"</i>
+            (DOI: <code>10.1109/ICMNWC66779.2025.11354307</code>).
+          </p>
+          <p>
+            While the base paper introduces graph-based skill proximity, our Smart Internship Portal extends this model into an end-to-end university ecosystem with real-world Supabase authentication, institutional NOC approval chains, and automated gradebook sync.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Benefits Section (3 Columns) -->
+    <section id="benefits" class="landing-section">
+      <div class="section-header">
+        <span class="section-eyebrow">THREE-WAY ECOSYSTEM</span>
+        <h2>Benefits for All Stakeholders</h2>
+        <p>A unified platform creating tangible advantages for students, faculty mentors, and hiring managers.</p>
+      </div>
+
+      <div class="benefits-grid">
+        <!-- Students -->
+        <div class="benefit-card">
+          <div class="benefit-icon">🎓</div>
+          <h3>For Students</h3>
+          <ul class="benefit-list">
+            <li>Intelligent recommendations based on your actual skills, not just job titles</li>
+            <li>No more application black holes with live Kanban status tracking</li>
+            <li>Instant ATS resume feedback and personalized skill-gap course recommendations</li>
+            <li>Seamless paperless NOC approval and guaranteed 2 academic credits</li>
+          </ul>
+        </div>
+
+        <!-- Colleges -->
+        <div class="benefit-card">
+          <div class="benefit-icon">🏛️</div>
+          <h3>For Colleges</h3>
+          <ul class="benefit-list">
+            <li>End-to-end digital approval chain from Faculty Mentor to Department HOD</li>
+            <li>Automated validation of minimum CGPA and prerequisite coursework</li>
+            <li>Live placement analytics and cohort-level skill demand insights</li>
+            <li>Protection against ghost postings through strict corporate verification</li>
+          </ul>
+        </div>
+
+        <!-- Employers -->
+        <div class="benefit-card">
+          <div class="benefit-icon">💼</div>
+          <h3>For Employers</h3>
+          <ul class="benefit-list">
+            <li>Direct access to pre-screened students meeting exact academic criteria</li>
+            <li>Semantic skill matching reducing time-to-hire by an average of 3 weeks</li>
+            <li>Structured evaluation portal for submitting performance scores</li>
+            <li>Verified company profile badge building trust with prospective talent</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Call to Action Banner -->
+    <div style="max-width: 1240px; margin: 0 auto;">
+      <section class="section-cta">
+        <h2>Ready to Accelerate Your Career Journey?</h2>
+        <p>Join Smart Internship Portal today and experience intelligent, friction-free internship discovery and academic credit workflows.</p>
+        <div class="hero-cta-group">
+          <button type="button" class="btn btn-cta-white" id="ctaGetStartedBtn">Create Student Account →</button>
+          <button type="button" class="btn btn-cta-ghost" id="ctaLoginBtn">Sign In to Portal</button>
+        </div>
+      </section>
+    </div>
+
+    <!-- Footer -->
+    <footer class="welcome-footer">
+      <div class="footer-container">
+        <div class="footer-col">
+          <div class="welcome-brand">
+            <div class="brand-icon-wrap" style="width:34px;height:34px;font-size:16px;">🎓</div>
+            <div>
+              <span class="brand-title" style="font-size:17px;">Smart Internship Portal</span>
+              <span class="brand-subtitle">Matrusri Engineering College</span>
+            </div>
+          </div>
+          <p style="margin-top:8px;">
+            An autonomous, data-driven academic platform engineered by CSE Team D07 to revolutionize the college internship experience.
+          </p>
+        </div>
+
+        <div class="footer-col">
+          <h4>Navigation</h4>
+          <a href="#welcomePage">Home</a>
+          <a href="#how-it-works">How It Works</a>
+          <a href="#features">Key Features</a>
+          <a href="#about">About Project</a>
+          <a href="#benefits">Stakeholders</a>
+        </div>
+
+        <div class="footer-col">
+          <h4>Institution</h4>
+          <p>Matrusri Engineering College</p>
+          <p>Saidabad, Hyderabad - 500059</p>
+          <p>Department of CSE</p>
+          <p>Email: hodcse@matrusri.edu.in</p>
+        </div>
+
+        <div class="footer-col">
+          <h4>Project Team</h4>
+          <p><b>Team D07:</b></p>
+          <p>Ramyasri Duggineni</p>
+          <p>Jyothsna Kanugula</p>
+          <p>R. Kalyan</p>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <div>© 2026 Smart Internship Portal · Matrusri Engineering College (CSE). All rights reserved.</div>
+        <div>Built with Supabase Authentication & IEEE Knowledge-Graph Architecture</div>
+      </div>
+    </footer>
+  </div>
 
 
-<div id="authGate">
- <section id="authCard" aria-labelledby="authTitle">
-  <h2 id="authTitle">Welcome to Smart Internship Portal</h2>
-  <p id="authIntro">Log in to access your student dashboard, or create a student account.</p>
-  <form id="authForm">
-   <label for="authEmail">Email address</label><input id="authEmail" type="email" autocomplete="email" required>
-   <label for="authPassword">Password</label><input id="authPassword" type="password" minlength="6" autocomplete="current-password" required>
-   <div id="signupNameWrap" hidden><label for="authName">Full name</label><input id="authName" autocomplete="name"></div>
-   <div class="auth-actions"><button class="btn pri" id="authSubmit" type="submit">Log in</button><button class="btn" id="authToggle" type="button">Create account</button></div>
-   <p id="authMessage" class="auth-error" role="status"></p>
-  </form>
- </section>
-</div>
-<div id="profilePanel" aria-hidden="true">
- <section class="profile-card"><div class="row spread"><h2>Student profile</h2><button class="btn" id="profileClose" type="button">Close</button></div>
-  <p class="muted">Your details are saved to your Supabase student profile.</p>
-  <form id="profileForm">
-   <label for="pfName">Full name</label><input id="pfName" required>
-   <label for="pfEmail">Email</label><input id="pfEmail" type="email" readonly>
-   <label for="pfCollege">College</label><input id="pfCollege" required>
-   <label for="pfDepartment">Department</label><input id="pfDepartment" required>
-   <label for="pfYear">Graduation year</label><input id="pfYear" type="number" min="2020" max="2100" required>
-   <div class="auth-actions"><button class="btn pri" type="submit">Save profile</button></div>
-   <p id="profileMessage" class="auth-error" role="status"></p>
-  </form>
- </section>
-</div>
+  <!-- ======================================================================
+       2. MODALS / DIALOG BOXES
+       ====================================================================== -->
 
-<script>
-/* ---------- Skill graph (knowledge-graph style) ---------- */
-const SK=["Python","Django","Flask","Pandas","Data Analysis","Statistics","Machine Learning","TensorFlow","REST APIs","Express","Node.js","JavaScript","React","HTML/CSS","SQL","PostgreSQL","MongoDB","Java","Spring Boot","Docker","AWS","Git"];
-const POS={"Python":[150,150],"Django":[70,80],"Flask":[70,200],"Pandas":[160,270],"Data Analysis":[260,320],"Statistics":[360,300],"Machine Learning":[260,200],"TensorFlow":[360,130],"REST APIs":[250,60],"Express":[400,50],"Node.js":[490,110],"JavaScript":[570,180],"React":[660,120],"HTML/CSS":[670,240],"SQL":[70,330],"PostgreSQL":[160,385],"MongoDB":[270,385],"Java":[410,360],"Spring Boot":[520,385],"Docker":[470,270],"AWS":[590,310],"Git":[390,205]};
-const ED=[["Python","Django",.8],["Python","Flask",.8],["Python","Pandas",.7],["Pandas","Data Analysis",.8],["Data Analysis","Statistics",.7],["Machine Learning","Python",.7],["Machine Learning","TensorFlow",.8],["Machine Learning","Statistics",.6],["JavaScript","React",.8],["JavaScript","Node.js",.8],["Node.js","Express",.85],["Express","REST APIs",.7],["Django","REST APIs",.7],["Flask","REST APIs",.7],["SQL","PostgreSQL",.85],["SQL","MongoDB",.5],["PostgreSQL","MongoDB",.5],["HTML/CSS","React",.6],["HTML/CSS","JavaScript",.6],["Docker","AWS",.6],["Git","Docker",.4],["Java","Spring Boot",.8],["Spring Boot","REST APIs",.7],["Node.js","Python",.4],["Python","JavaScript",.3]];
-const M={};SK.forEach(a=>{M[a]={};SK.forEach(b=>M[a][b]=a===b?1:0)});
-ED.forEach(([a,b,w])=>{M[a][b]=M[b][a]=w});
-SK.forEach(k=>SK.forEach(a=>SK.forEach(b=>{const v=M[a][k]*M[k][b];if(v>M[a][b])M[a][b]=v})));
-const ALIAS={"js":"JavaScript","node":"Node.js","nodejs":"Node.js","ml":"Machine Learning","postgres":"PostgreSQL","reactjs":"React","rest":"REST APIs","html":"HTML/CSS","css":"HTML/CSS","tensorflow":"TensorFlow","springboot":"Spring Boot","mongo":"MongoDB","expressjs":"Express"};
+  <!-- A. Student Login Modal -->
+  <div id="loginModal" class="modal-backdrop" hidden>
+    <div class="modal-card" role="dialog" aria-labelledby="loginTitle" aria-modal="true">
+      <div class="modal-header">
+        <h3 id="loginTitle">Student Login</h3>
+        <button type="button" class="modal-close" data-close-modal aria-label="Close dialog">&times;</button>
+      </div>
+      <p class="modal-subtitle">Log in to your Smart Internship Portal student dashboard.</p>
+      
+      <form id="loginForm">
+        <div class="form-group">
+          <label for="loginEmail">Email address</label>
+          <input id="loginEmail" type="email" placeholder="e.g. ramya.d@student.matrusri.edu.in" autocomplete="email" required>
+        </div>
 
-/* ---------- Sample data ---------- */
-const COURSES=["DBMS","Operating Systems","Data Structures","Web Technologies","Python Programming"];
-const LEARN=[
- {id:"c1",t:"Django for Backend Development",skills:["Django","REST APIs"],h:12},
- {id:"c2",t:"Data Analysis with Pandas",skills:["Pandas","Data Analysis"],h:10},
- {id:"c3",t:"React Fundamentals",skills:["React","JavaScript"],h:14},
- {id:"c4",t:"Node.js and Express APIs",skills:["Node.js","Express"],h:10},
- {id:"c5",t:"Applied Statistics",skills:["Statistics"],h:8},
- {id:"c6",t:"Docker and Cloud Basics",skills:["Docker","AWS"],h:9},
- {id:"c7",t:"Java and Spring Boot",skills:["Java","Spring Boot"],h:16},
- {id:"c8",t:"Machine Learning with TensorFlow",skills:["Machine Learning","TensorFlow"],h:18}];
-const REGISTRY={"NPTEL-PY-2026-04171":{issuer:"NPTEL",skill:"Python"},"COURSERA-SQL-88231":{issuer:"Coursera",skill:"SQL"},"AWS-CP-2026-7710":{issuer:"AWS",skill:"AWS"},"UDEMY-REACT-30911":{issuer:"Udemy",skill:"React"}};
-const S={
- role:"student",view:"feed",mode:"graph",signRole:"Mentor",selJob:"j1",resumeJob:"j1",resume:
-`DUGGINENI RAMYA
-ramya.d@student.matrusri.edu.in | Hyderabad
+        <div class="form-group">
+          <div class="label-row">
+            <label for="loginPassword">Password</label>
+            <button type="button" class="btn-link small" id="openForgotBtn">Forgot password?</button>
+          </div>
+          <input id="loginPassword" type="password" placeholder="Enter your password" autocomplete="current-password" required>
+        </div>
 
-EDUCATION
-B.E. Computer Science and Engineering, Matrusri Engineering College, CGPA 8.2
+        <button type="submit" class="btn btn-primary btn-block" id="loginSubmitBtn">Log In</button>
+        <div class="modal-msg" id="loginMsg" role="status"></div>
 
-PROJECTS
-Campus Notice Board: Flask web app with SQL storage, used by 340 students.
-Expense Tracker: Python CLI, Git versioned, 120 commits.
+        <div class="modal-footer-text">
+          Don't have an account? <button type="button" class="btn-link font-bold" id="switchToSignup">Create Account</button>
+        </div>
+      </form>
+    </div>
+  </div>
 
-SKILLS
-Python, Flask, SQL, HTML, CSS, Git`,
- student:{name:"Ramya D.",cgpa:8.2,courses:[...COURSES],skills:["Python","SQL","HTML/CSS","Git","Flask"]},
- employers:[
-  {n:"Nimbus Labs",v:true,cin:"U72900TG2018PTC123456"},{n:"Orbit Digital",v:true},{n:"Veda AI",v:true},{n:"Stratus Cloud",v:true},{n:"Kaveri Systems",v:true},{n:"QuickHire Solutions",v:false,why:"CIN not found in registry. Posts 'free training' roles with no mentor."}],
- jobs:[
-  {id:"j1",t:"Backend Engineer Intern",e:"Nimbus Labs",req:["Django","REST APIs","SQL","Git"],minCgpa:7,prereq:["DBMS"],loc:"Hyderabad · Hybrid",pay:"₹20,000/mo"},
-  {id:"j2",t:"Data Analyst Intern",e:"Nimbus Labs",req:["Pandas","Data Analysis","SQL","Statistics"],minCgpa:7.5,prereq:["DBMS","Python Programming"],loc:"Hyderabad · On-site",pay:"₹18,000/mo"},
-  {id:"j3",t:"Full-Stack Web Intern",e:"Orbit Digital",req:["React","Node.js","SQL","HTML/CSS"],minCgpa:7,prereq:["Web Technologies"],loc:"Remote",pay:"₹15,000/mo"},
-  {id:"j4",t:"Machine Learning Intern",e:"Veda AI",req:["Machine Learning","Python","TensorFlow","Statistics"],minCgpa:8.5,prereq:["Machine Learning Fundamentals"],loc:"Bengaluru · Hybrid",pay:"₹30,000/mo"},
-  {id:"j5",t:"Cloud and DevOps Intern",e:"Stratus Cloud",req:["Docker","AWS","Git"],minCgpa:7,prereq:["Operating Systems"],loc:"Remote",pay:"₹22,000/mo"},
-  {id:"j6",t:"Java Developer Intern",e:"Kaveri Systems",req:["Java","Spring Boot","SQL","REST APIs"],minCgpa:7,prereq:["Data Structures"],loc:"Hyderabad · On-site",pay:"₹16,000/mo"},
-  {id:"j7",t:"Frontend Developer Intern",e:"Orbit Digital",req:["React","JavaScript","HTML/CSS"],minCgpa:6.5,prereq:["Web Technologies"],loc:"Remote",pay:"₹14,000/mo"},
-  {id:"j8",t:"Marketing and Data Entry Intern (free training)",e:"QuickHire Solutions",req:["SQL"],minCgpa:5,prereq:[],loc:"Remote",pay:"Unpaid"}],
- apps:[
-  {id:1,job:"j1",who:"You",stage:3,log:[[0,"Applied"],[1,"Under review"],[2,"Interview scheduled"],[3,"Selected"]]},
-  {id:2,job:"j1",who:"Kiran P.",stage:2,log:[]},{id:3,job:"j1",who:"Anusha R.",stage:1,log:[]},{id:4,job:"j2",who:"Sai T.",stage:0,log:[]},{id:5,job:"j2",who:"Meghana K.",stage:1,log:[]}],
- msgs:[{from:"Nimbus Labs",t:"Congratulations. You are selected for Backend Engineer Intern. Request your NOC to confirm the start date.",ts:"Today"}],
- noc:null,hours:0,evalScore:null,gradebook:[["Database Management Systems","4","A+"],["Operating Systems","4","A"],["Data Structures","4","A+"],["Web Technologies","3","A"]],pushed:false,
- certs:[],chat:[{b:1,t:"Hi Ramya. I can explain your matches, check eligibility, find skill gaps and track your applications. Try a suggestion below."}],
- done:[],vres:null,vform:{n:"Nimbus Labs Pvt Ltd",cin:"U72900TG2018PTC123456",gst:"36AABCN1234F1Z5",web:"nimbuslabs.in",em:"hr@nimbuslabs.in"}
-};
-const STAGES=["Applied","Under review","Interview scheduled","Selected","Not selected"];
-const CHAIN=["Mentor","HOD","Placement Officer"];
-const SIGNERS={"Mentor":"Prof. A.V. Murali Krishna","HOD":"HOD, Dept. of CSE","Placement Officer":"Training and Placement Officer"};
-const REQH=120;
+  <!-- B. Student Create Account Modal -->
+  <div id="signupModal" class="modal-backdrop" hidden>
+    <div class="modal-card modal-card-lg" role="dialog" aria-labelledby="signupTitle" aria-modal="true">
+      <div class="modal-header">
+        <h3 id="signupTitle">Create Student Account</h3>
+        <button type="button" class="modal-close" data-close-modal aria-label="Close dialog">&times;</button>
+      </div>
+      <p class="modal-subtitle">Register to unlock personalized skill-graph matching, verified internships, and academic credit sync.</p>
 
-/* ---------- Helpers ---------- */
-const $=s=>document.querySelector(s);
-const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
-const job=id=>S.jobs.find(j=>j.id===id);
-const emp=n=>S.employers.find(e=>e.n===n);
-const now=()=>new Date().toLocaleString("en-IN",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"});
-const hash=s=>{let h=5381;for(const c of s)h=((h<<5)+h+c.charCodeAt(0))>>>0;return h.toString(16).toUpperCase().padStart(8,"0")};
-function toast(t){const el=$("#toast");el.textContent=t;el.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>el.hidden=true,2600)}
-const pct=x=>Math.round(x*100);
-function match(j,skills=S.student.skills){
-  const rows=j.req.map(r=>{let best=0,from=null;skills.forEach(s=>{if(M[s][r]>best){best=M[s][r];from=s}});return{r,best,from,exact:skills.includes(r)}});
-  return{rows,graph:rows.reduce((a,x)=>a+x.best,0)/rows.length,kw:rows.filter(x=>x.exact).length/rows.length};
-}
-function elig(j){const o=[];if(S.student.cgpa<j.minCgpa)o.push(`CGPA ${S.student.cgpa} is below the minimum ${j.minCgpa}`);j.prereq.forEach(c=>{if(!S.student.courses.includes(c))o.push(`Course not completed: ${c}`)});return o}
-const visible=()=>S.jobs.filter(j=>emp(j.e)?.v);
-const myApp=()=>S.apps.find(a=>a.who==="You"&&a.stage===3);
-const hasApp=id=>S.apps.some(a=>a.who==="You"&&a.job===id);
+      <form id="signupForm">
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="signupFullName">Full name *</label>
+            <input id="signupFullName" type="text" placeholder="e.g. Duggineni Ramya" autocomplete="name" required>
+          </div>
 
-/* ---------- Navigation ---------- */
-const NAV={
- student:[["feed","Recommended"],["graph","Skill graph"],["tracker","Application tracker"],["docs","NOC and certificates"],["credit","Hours and credit"],["resume","Resume optimiser"],["learn","Skill learning"],["chat","Assistant"]],
- employer:[["verify","Verification"],["post","Post a role"],["pipeline","Applicants"],["eval","Evaluation"]],
- admin:[["approvals","Approvals"],["gradebook","Credit transfer"],["analytics","Analytics"],["emps","Employers"]]};
-const DEFAULT={student:"feed",employer:"pipeline",admin:"approvals"};
-const ROLES={student:"Student",employer:"Employer",admin:"Faculty and admin"};
-function badge(v){
-  if(v==="approvals"){const n=S.noc&&S.noc.signed.length<3?1:0;return n?`<span class="dot">${n}</span>`:""}
-  if(v==="eval"){return S.hours>=REQH&&S.evalScore===null?`<span class="dot">1</span>`:""}
-  return"";
-}
-function renderChrome(){
-  $("#roles").innerHTML=Object.entries(ROLES).map(([k,v])=>`<button data-role="${k}" aria-pressed="${S.role===k}">${v}</button>`).join("");
-  $("#nav").innerHTML=NAV[S.role].map(([k,v])=>`<button data-view="${k}" ${S.view===k?'aria-current="page"':""}>${v}${badge(k)}</button>`).join("");
-}
-function render(){renderChrome();$("#main").innerHTML=V[S.role][S.view]();if(S.view==="chat"){const c=$(".chat");if(c)c.scrollTop=c.scrollHeight}}
+          <div class="form-group">
+            <label for="signupEmail">College email *</label>
+            <input id="signupEmail" type="email" placeholder="e.g. ramya.d@student.matrusri.edu.in" autocomplete="email" required>
+          </div>
 
-/* ---------- Student views ---------- */
-function jobCard(j,m,showKw){
-  const iss=elig(j),applied=hasApp(j.id),v=emp(j.e)?.v;
-  const chips=m.rows.map(x=>x.exact?`<span class="chip ok">✓ ${esc(x.r)}</span>`:x.best>=.4?`<span class="chip rel" title="Inferred through the skill graph">≈ ${esc(x.r)} · from ${esc(x.from)} ${pct(x.best)}%</span>`:`<span class="chip gap">Gap: ${esc(x.r)}</span>`).join("");
-  const score=S.mode==="graph"?m.graph:m.kw;
-  return`<article class="panel job"><div class="job-top"><div><h3>${esc(j.t)}</h3><div class="row small muted"><span>${esc(j.e)}</span>${v?'<span class="chip ok">Verified employer</span>':""}<span>${esc(j.loc)}</span><span>${esc(j.pay)}</span></div></div>
-  <div class="score"><b>${pct(score)}%</b><span class="small muted">${S.mode==="graph"?"skill-graph match":"keyword match"}</span></div></div>
-  <div class="bar ${S.mode==="graph"?"":"kw"}"><i style="width:${pct(score)}%"></i></div>
-  <div class="chips">${chips}</div>
-  ${S.mode==="graph"&&m.kw<m.graph-.15?`<div class="why">Keyword search would score this only ${pct(m.kw)}%. Related skills raise it to ${pct(m.graph)}%.</div>`:""}
-  <div class="row spread"><div class="small">${iss.length?`<span class="chip bad">Not eligible</span> ${esc(iss.join(". "))}`:`<span class="chip ok">Eligible</span> <span class="muted">Min CGPA ${j.minCgpa}${j.prereq.length?" · "+esc(j.prereq.join(", ")):""}</span>`}</div>
-  <button class="btn pri" data-act="apply" data-id="${j.id}" ${iss.length||applied?"disabled":""}>${applied?"Applied":"Apply"}</button></div></article>`;
-}
-function skillEditor(){
-  const free=SK.filter(s=>!S.student.skills.includes(s));
-  return`<div class="panel"><h3>Your skills</h3><div class="chips" style="margin-bottom:10px">${S.student.skills.map(s=>`<span class="chip acc">${esc(s)}<button data-act="rmskill" data-s="${esc(s)}" aria-label="Remove ${esc(s)}">×</button></span>`).join("")||'<span class="muted">No skills yet</span>'}</div>
-  <div class="row"><select id="addsk" style="max-width:220px" aria-label="Add skill">${free.map(s=>`<option>${esc(s)}</option>`).join("")}</select><button class="btn" data-act="addskill">Add skill</button><span class="small muted">CGPA ${S.student.cgpa} · ${esc(S.student.courses.length)} courses completed</span></div></div>`;
-}
-const V={student:{},employer:{},admin:{}};
-V.student.feed=()=>{
-  let list=visible().map(j=>({j,m:match(j)}));
-  const key=x=>S.mode==="graph"?x.m.graph:x.m.kw;
-  let hidden=[];
-  if(S.mode==="keyword"){hidden=list.filter(x=>x.m.kw<.5);list=list.filter(x=>x.m.kw>=.5)}
-  list.sort((a,b)=>key(b)-key(a));
-  const blocked=S.jobs.filter(j=>!emp(j.e)?.v).length;
-  return`<div class="head"><div><h2>Recommended for you</h2><p>Ranked from your profile. Change your skills below and the ranking updates.</p></div>
-  <div class="seg" role="group" aria-label="Matching mode"><button data-mode="graph" aria-pressed="${S.mode==="graph"}">Skill-graph</button><button data-mode="keyword" aria-pressed="${S.mode==="keyword"}">Keyword</button></div></div>
-  ${skillEditor()}
-  ${S.mode==="keyword"?`<div class="note warn"><b>Keyword mode.</b> Only exact skill tags count, so ${hidden.length} listing${hidden.length===1?" is":"s are"} hidden: ${hidden.map(x=>esc(x.j.t)+" ("+pct(x.m.graph)+"% by skill graph)").join(", ")||"none"}.</div>`:`<div class="note">Skill-graph mode treats related skills as partial matches, for example Flask counts toward REST APIs.</div>`}
-  ${blocked?`<div class="note bad">${blocked} posting${blocked>1?"s":""} hidden because the employer failed verification.</div>`:""}
-  <div style="display:flex;flex-direction:column;gap:12px">${list.map(x=>jobCard(x.j,x.m)).join("")}</div>`;
-};
-V.student.graph=()=>{
-  const j=job(S.selJob),req=j?j.req:[];
-  const edges=ED.map(([a,b,w])=>{const [x1,y1]=POS[a],[x2,y2]=POS[b];return`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="var(--muted)" stroke-opacity="${.15+w*.5}" stroke-width="${1+w*2}"/>`}).join("");
-  const nodes=SK.map(s=>{const [x,y]=POS[s],mine=S.student.skills.includes(s),r=req.includes(s);
-    return`<g><circle cx="${x}" cy="${y}" r="${mine?11:8}" fill="${mine?"var(--accent)":"var(--surface)"}" stroke="${r?"var(--warn)":"var(--muted)"}" stroke-width="${r?3.5:1.2}"/><text x="${x}" y="${y+(y>350?-16:24)}" text-anchor="middle">${esc(s)}</text></g>`}).join("");
-  const m=j?match(j):null;
-  return`<div class="head"><div><h2>Skill graph</h2><p>Skills are connected by how closely related they are. Match scores come from the strongest path between your skills and what a role needs.</p></div>
-  <label>Highlight role<select id="seljob">${visible().map(x=>`<option value="${x.id}" ${x.id===S.selJob?"selected":""}>${esc(x.t)}</option>`).join("")}</select></label></div>
-  <div class="panel"><div class="tw"><svg viewBox="0 0 740 420" style="min-width:640px;width:100%;height:auto" role="img" aria-label="Skill graph">${edges}${nodes}</svg></div>
-  <div class="row small muted" style="margin-top:8px"><span><svg width="14" height="14"><circle cx="7" cy="7" r="6" fill="var(--accent)"/></svg> your skill</span><span><svg width="14" height="14"><circle cx="7" cy="7" r="5" fill="none" stroke="var(--warn)" stroke-width="3"/></svg> required by role</span><span>Line weight shows relatedness</span></div></div>
-  ${m?`<div class="panel"><h3>${esc(j.t)}: ${pct(m.graph)}% match</h3><div class="why">${m.rows.map(x=>x.exact?`✓ ${esc(x.r)}: you have it`:x.best>=.4?`≈ ${esc(x.r)}: ${pct(x.best)}% via ${esc(x.from)}`:`✗ ${esc(x.r)}: closest skill is ${pct(x.best)}%. Consider a course.`).join("<br>")}</div></div>`:""}`;
-};
-function kanban(apps,mode){
-  const cols=[0,1,2,3,4];
-  return`<div class="kan">${cols.map(c=>{const items=apps.filter(a=>a.stage===c);return`<div class="col"><h4>${STAGES[c]}<span>${items.length}</span></h4>${items.map(a=>{const j=job(a.job);
-    return`<div class="card ${a.who==="You"?"me":""}"><b>${mode==="emp"?esc(a.who):esc(j.t)}</b><span class="muted small">${mode==="emp"?esc(j.t):esc(j.e)}</span>
-    ${mode==="emp"&&c<3?`<div class="row"><button class="btn sm pri" data-act="move" data-id="${a.id}">Move to ${STAGES[c+1]}</button><button class="btn sm" data-act="reject" data-id="${a.id}">Reject</button></div>`:""}</div>`}).join("")||'<span class="small muted">None</span>'}</div>`}).join("")}</div>`;
-}
-V.student.tracker=()=>{
-  const mine=S.apps.filter(a=>a.who==="You");
-  return`<div class="head"><div><h2>Application tracker</h2><p>Every status change appears here as soon as the employer makes it. Switch to the Employer view and move a candidate to see it update.</p></div></div>
-  <div class="panel"><h3>Your applications</h3>${mine.length?kanban(mine,"stu"):'<p class="muted">No applications yet. Apply from Recommended.</p>'}</div>
-  <div class="panel"><h3>Communication hub</h3><div style="display:flex;flex-direction:column;gap:8px">${S.msgs.map(m=>`<div class="card"><div class="row spread"><b>${esc(m.from)}</b><span class="small muted mono">${esc(m.ts)}</span></div>${esc(m.t)}</div>`).join("")}</div></div>`;
-};
-function nocBlock(){
-  const a=myApp();
-  if(!a)return`<div class="note">You will be able to request a No Objection Certificate once an employer selects you.</div>`;
-  const j=job(a.job);
-  if(!S.noc)return`<div class="row spread"><div><b>${esc(j.t)}</b> at ${esc(j.e)}<div class="small muted">Selected. Your NOC goes to your mentor, then the HOD, then the placement officer.</div></div><button class="btn pri" data-act="reqnoc">Request NOC</button></div>`;
-  return`<div style="margin-bottom:10px"><b>NOC: ${esc(j.t)}, ${esc(j.e)}</b></div><div class="steps">${CHAIN.map((r,i)=>{const s=S.noc.signed[i];const cls=s?"done":i===S.noc.signed.length?"next":"";
-   return`<div class="step ${cls}"><span class="small muted">${r}</span>${s?`<span class="sig">${esc(s.name)}</span><span class="small mono muted">${esc(s.ts)} · ${s.h}</span>`:`<span class="small">${i===S.noc.signed.length?"Waiting for signature":"Queued"}</span>`}</div>`}).join("")}</div>
-   ${S.noc.signed.length===3?'<div class="note good" style="margin-top:10px">NOC fully signed. You can start the internship and log hours under Hours and credit.</div>':""}`;
-}
-V.student.docs=()=>`<div class="head"><div><h2>NOC and certificates</h2><p>Approvals move through an online chain of command. Certificates are checked against a registry before they count.</p></div></div>
-  <div class="panel"><h3>No Objection Certificate</h3>${nocBlock()}</div>
-  <div class="panel"><h3>Certificate verification</h3>
-  <form class="form" id="certform"><label>Certificate title<input id="ct" value="Python for Everybody" required></label>
-  <label>Issuer<select id="ci"><option>NPTEL</option><option>Coursera</option><option>AWS</option><option>Udemy</option></select></label>
-  <label>Credential ID<input id="cid" value="NPTEL-PY-2026-04171" required></label>
-  <label>&nbsp;<button class="btn pri" type="submit">Verify</button></label></form>
-  <p class="small muted" style="margin-top:8px">Sample IDs that verify: ${Object.keys(REGISTRY).join(", ")}. Any other ID is rejected.</p>
-  ${S.certs.length?`<div class="tw" style="margin-top:10px"><table><tr><th>Certificate</th><th>Issuer</th><th>ID</th><th>Status</th></tr>${S.certs.map(c=>`<tr><td>${esc(c.t)}</td><td>${esc(c.i)}</td><td class="mono">${esc(c.id)}</td><td><span class="chip ${c.ok?"ok":"bad"}">${c.ok?"Verified":"Rejected"}</span> <span class="small muted">${esc(c.note)}</span></td></tr>`).join("")}</table></div>`:""}</div>`;
-V.student.credit=()=>{
-  const a=myApp(),active=S.noc&&S.noc.signed.length===3,pc=Math.min(100,Math.round(S.hours/REQH*100));
-  const gpa=S.gradebook;
-  return`<div class="head"><div><h2>Hours and credit</h2><p>Logged hours and the employer evaluation feed your gradebook. Faculty confirms the transfer.</p></div></div>
-  <div class="panel"><h3>Internship progress</h3>${active?`<div class="row spread"><span>${esc(job(a.job).t)} · ${esc(job(a.job).e)}</span><span class="mono">${S.hours} / ${REQH} h</span></div><div class="bar" style="margin:8px 0"><i style="width:${pc}%"></i></div>
-   <div class="row"><button class="btn pri" data-act="hours" ${S.hours>=REQH?"disabled":""}>Log 20 hours</button><span class="small muted">${S.evalScore===null?(S.hours>=REQH?"Hours complete. Waiting for the employer evaluation.":"Evaluation opens at "+REQH+" hours."):`Employer score: ${S.evalScore}/100`}</span></div>`:'<p class="muted">Available after your NOC is fully signed.</p>'}</div>
-  <div class="panel"><h3>University gradebook</h3><div class="tw"><table><tr><th>Course</th><th>Credits</th><th>Grade</th></tr>${gpa.map(r=>`<tr><td>${esc(r[0])}</td><td class="mono">${r[1]}</td><td class="mono">${r[2]}</td></tr>`).join("")}</table></div>
-  ${S.pushed?'<div class="note good" style="margin-top:10px">Internship credits were pushed to the gradebook after supervisor evaluation.</div>':""}</div>`;
-};
-function analyse(text,j){
-  const t=text.toLowerCase(),found=new Set();
-  SK.forEach(s=>{if(t.includes(s.toLowerCase()))found.add(s)});
-  Object.entries(ALIAS).forEach(([k,v])=>{if(new RegExp("(^|[^a-z])"+k+"([^a-z]|$)").test(t))found.add(v)});
-  const m=match(j,[...found]);
-  const checks=[["Contact email",/@/.test(text),8],["Education section",/education|b\.e\.|b\.tech/i.test(text),7],["Projects section",/project/i.test(text),8],["Quantified results",/\d+\s*(%|students|users|commits|x)/i.test(text),7]];
-  const ats=Math.round(m.graph*70+checks.reduce((a,c)=>a+(c[1]?c[2]:0),0));
-  return{found:[...found],m,checks,ats};
-}
-V.student.resume=()=>{
-  const j=job(S.resumeJob),r=S.vres;
-  const gaps=r?r.m.rows.filter(x=>x.best<.6):[];
-  const recs=[...new Set(gaps.flatMap(g=>LEARN.filter(c=>c.skills.includes(g.r))))];
-  return`<div class="head"><div><h2>Resume optimiser</h2><p>Paste your resume text and pick a role. It reads the skills in your resume, scores them against the role and suggests courses for the gaps.</p></div></div>
-  <div class="grid2"><div class="panel"><label>Target role<select id="rjob">${visible().map(x=>`<option value="${x.id}" ${x.id===S.resumeJob?"selected":""}>${esc(x.t)}, ${esc(x.e)}</option>`).join("")}</select></label>
-  <label style="margin-top:10px">Resume text<textarea id="rtext">${esc(S.resume)}</textarea></label><div class="row" style="margin-top:10px"><button class="btn pri" data-act="analyse">Analyse resume</button></div></div>
-  <div class="panel"><h3>Result</h3>${r?`<div class="row spread"><span class="stat"><b>${r.ats}</b><span class="small muted">ATS score out of 100</span></span><span class="stat"><b>${pct(r.m.graph)}%</b><span class="small muted">skill-graph fit to ${esc(j.t)}</span></span></div>
-   <div class="bar" style="margin:10px 0"><i style="width:${r.ats}%"></i></div>
-   <div class="small muted">Skills found</div><div class="chips" style="margin:4px 0 10px">${r.found.map(s=>`<span class="chip ok">${esc(s)}</span>`).join("")||"None"}</div>
-   <div class="small muted">Resume checks</div><div class="why" style="margin:4px 0 10px">${r.checks.map(c=>`${c[1]?"✓":"✗"} ${c[0]}`).join("<br>")}</div>
-   <div class="small muted">Skill gaps</div><div class="chips" style="margin:4px 0 10px">${gaps.map(g=>`<span class="chip gap">${esc(g.r)} · ${pct(g.best)}%</span>`).join("")||'<span class="chip ok">No gaps</span>'}</div>
-   ${recs.length?`<div class="small muted">Recommended courses</div>${recs.map(c=>`<div class="row spread card" style="margin-top:6px"><span>${esc(c.t)} <span class="muted small">${c.h} h</span></span><button class="btn sm" data-go="learn">Open</button></div>`).join("")}`:""}`:'<p class="muted">Run the analysis to see your score.</p>'}</div></div>`;
-};
-V.student.learn=()=>`<div class="head"><div><h2>Skill learning</h2><p>Finish a course assessment and its skills are added to your profile, which updates your recommendations. Assessments are simulated in this prototype.</p></div></div>
-  <div class="grid2">${LEARN.map(c=>{const d=S.done.includes(c.id);return`<div class="panel"><div class="row spread"><h3>${esc(c.t)}</h3><span class="small muted mono">${c.h} h</span></div><div class="chips" style="margin:8px 0">${c.skills.map(s=>`<span class="chip ${S.student.skills.includes(s)?"ok":""}">${esc(s)}</span>`).join("")}</div>
-  <button class="btn ${d?"":"pri"}" data-act="learn" data-id="${c.id}" ${d?"disabled":""}>${d?"Assessment passed":"Take assessment"}</button></div>`}).join("")}</div>`;
-function reply(q){
-  const t=q.toLowerCase(),L=visible().map(j=>({j,m:match(j)})).sort((a,b)=>b.m.graph-a.m.graph);
-  if(/best|recommend|which|suit/.test(t)){const x=L[0];return`Your best match is ${x.j.t} at ${x.j.e}, ${pct(x.m.graph)}% by skill graph. ${x.m.rows.filter(r=>r.best<.6).length?"To strengthen it, work on: "+x.m.rows.filter(r=>r.best<.6).map(r=>r.r).join(", ")+".":"You already cover every required skill."}\nNext: ${L[1].j.t} (${pct(L[1].m.graph)}%).`}
-  if(/eligib|cgpa|qualif/.test(t))return L.map(x=>{const i=elig(x.j);return`${x.j.t}: ${i.length?"not eligible. "+i.join("; "):"eligible"}`}).join("\n");
-  if(/gap|missing|learn|improve|skill/.test(t)){const x=L[0];const g=x.m.rows.filter(r=>r.best<.6);return g.length?`For ${x.j.t} you are weakest in ${g.map(r=>r.r).join(", ")}. Suggested: ${[...new Set(g.flatMap(r=>LEARN.filter(c=>c.skills.includes(r.r)).map(c=>c.t)))].join("; ")}.`:`No major gaps for ${x.j.t}.`}
-  if(/status|track|appl/.test(t)){const m=S.apps.filter(a=>a.who==="You");return m.length?m.map(a=>`${job(a.job).t}: ${STAGES[a.stage]}`).join("\n"):"You have not applied anywhere yet."}
-  if(/noc|sign|approv/.test(t))return S.noc?`Your NOC has ${S.noc.signed.length} of 3 signatures. ${S.noc.signed.length<3?"Next: "+CHAIN[S.noc.signed.length]+".":"It is complete."}`:"Request a NOC from the NOC and certificates page once you are selected.";
-  if(/resume|ats|cv/.test(t))return"Open Resume optimiser, paste your text and choose a role. It returns an ATS score, skill gaps and course suggestions.";
-  return"I can help with: best internship, eligibility, skill gaps, application status, NOC status, resume tips.";
-}
-V.student.chat=()=>`<div class="head"><div><h2>Assistant</h2><p>Answers come from your profile and the live data in this prototype.</p></div></div>
-  <div class="panel"><div class="chat">${S.chat.map(m=>`<div class="msg ${m.b?"b":"u"}">${esc(m.t)}</div>`).join("")}</div>
-  <div class="chips" style="margin:10px 0">${["Which internship is best for me?","Am I eligible for all roles?","What skills am I missing?","What is my application status?","NOC status"].map(q=>`<button class="btn sm" data-act="ask" data-q="${esc(q)}">${esc(q)}</button>`).join("")}</div>
-  <form class="row" id="chatform" style="flex-wrap:nowrap"><input id="chatq" placeholder="Ask a question" autocomplete="off" aria-label="Ask a question"><button class="btn pri" type="submit">Send</button></form></div>`;
+          <div class="form-group">
+            <label for="signupPassword">Password *</label>
+            <input id="signupPassword" type="password" minlength="6" placeholder="Min. 6 characters" autocomplete="new-password" required>
+          </div>
 
-/* ---------- Employer views ---------- */
-const me="Nimbus Labs";
-V.employer.verify=()=>{
-  const f=S.vform,r=S.vres2;
-  return`<div class="head"><div><h2>Employer verification</h2><p>New employers are checked automatically before any posting reaches students. The sample values below are fictional.</p></div></div>
-  <div class="panel"><form class="form" id="vform"><label>Company name<input id="vn" value="${esc(f.n)}"></label><label>CIN (21 characters)<input id="vc" value="${esc(f.cin)}"></label><label>GSTIN (15 characters)<input id="vg" value="${esc(f.gst)}"></label><label>Company website<input id="vw" value="${esc(f.web)}"></label><label>HR email<input id="ve" value="${esc(f.em)}"></label>
-  <label>&nbsp;<span class="row"><button class="btn pri" type="submit">Run verification</button><button class="btn" type="button" data-act="badv">Load invalid sample</button></span></label></form></div>
-  ${r?`<div class="panel"><h3>${r.ok?"Verified. You can post roles.":"Verification failed"}</h3><div class="why">${r.c.map(c=>`${c[1]?"✓":"✗"} ${c[0]}`).join("<br>")}</div></div>`:""}`;
-};
-V.employer.post=()=>`<div class="head"><div><h2>Post a role</h2><p>Posting as ${me}. Required skills feed the matching engine, so list what the intern will actually do.</p></div></div>
-  <div class="panel"><form id="pform" style="display:flex;flex-direction:column;gap:12px"><div class="form"><label>Role title<input id="pt" value="Site Reliability Intern" required></label><label>Minimum CGPA<input id="pg" type="number" step="0.1" min="0" max="10" value="7"></label>
-  <label>Prerequisite course<select id="pp"><option value="">None</option>${COURSES.map(c=>`<option>${c}</option>`).join("")}</select></label><label>Stipend<input id="ps" value="₹20,000/mo"></label></div>
-  <div><div class="small muted" style="margin-bottom:6px">Required skills (pick 2 to 5)</div><div class="chips">${SK.map(s=>`<label style="flex-direction:row;align-items:center;gap:4px;border:1px solid var(--line);padding:3px 9px;border-radius:99px;background:var(--bg)"><input type="checkbox" name="rs" value="${s}" ${["Docker","AWS","Git"].includes(s)?"checked":""} style="width:auto">${esc(s)}</label>`).join("")}</div></div>
-  <div><button class="btn pri" type="submit">Publish role</button></div></form></div>`;
-V.employer.pipeline=()=>{
-  const apps=S.apps.filter(a=>job(a.job).e===me);
-  return`<div class="head"><div><h2>Applicants</h2><p>Moving a candidate sends a message to the student and updates their tracker instantly.</p></div></div>
-  <div class="panel">${kanban(apps,"emp")}</div>`;
-};
-V.employer.eval=()=>{
-  const a=myApp();
-  return`<div class="head"><div><h2>Intern evaluation</h2><p>Open after the intern logs ${REQH} hours. The score goes to faculty for the gradebook.</p></div></div>
-  <div class="panel">${!a?'<p class="muted">No selected intern yet.</p>':`<div class="row spread"><span><b>Ramya D.</b> · ${esc(job(a.job).t)}</span><span class="mono">${S.hours} / ${REQH} h</span></div>
-  ${S.evalScore!==null?`<div class="note good" style="margin-top:10px">Evaluation submitted: ${S.evalScore}/100.</div>`:S.hours<REQH?'<div class="note warn" style="margin-top:10px">Waiting for the intern to complete the required hours. Log hours from the Student view.</div>':`<form class="row" id="eform" style="margin-top:10px"><label>Score (0 to 100)<input id="es" type="number" min="0" max="100" value="86" required style="width:120px"></label><label>&nbsp;<button class="btn pri" type="submit">Submit evaluation</button></label></form>`}`}</div>`;
-};
+          <div class="form-group">
+            <label for="signupConfirmPassword">Confirm password *</label>
+            <input id="signupConfirmPassword" type="password" minlength="6" placeholder="Re-enter password" autocomplete="new-password" required>
+          </div>
 
-/* ---------- Admin views ---------- */
-V.admin.approvals=()=>{
-  const n=S.noc,next=n?n.signed.length:null,a=myApp();
-  const can=n&&next<3&&CHAIN[next]===S.signRole;
-  return`<div class="head"><div><h2>Approvals</h2><p>Each NOC is signed in order. Choose the role you are signing as.</p></div>
-  <div class="seg" role="group" aria-label="Signing as">${CHAIN.map(r=>`<button data-sr="${r}" aria-pressed="${S.signRole===r}">${r}</button>`).join("")}</div></div>
-  <div class="panel">${!n?'<p class="muted">No approval requests. The student requests a NOC after being selected.</p>':`<div class="row spread" style="margin-bottom:10px"><span><b>NOC request</b> · Ramya D. · ${esc(job(a.job).t)}, ${esc(job(a.job).e)}</span><span class="chip ${next===3?"ok":"rel"}">${next===3?"Complete":"Awaiting "+CHAIN[next]}</span></div>${nocBlock().replace(/^<div style="margin-bottom:10px">.*?<\/div>/,"")}
-  ${can?`<form class="row" id="sform" style="margin-top:12px"><label>Type your full name to sign<input id="sn" value="${esc(SIGNERS[S.signRole])}" required></label><label>&nbsp;<button class="btn pri" type="submit">Sign as ${S.signRole}</button></label></form>`:(next<3?`<div class="note warn" style="margin-top:12px">Next signature is ${CHAIN[next]}. Switch the role above to sign.</div>`:"")}`}</div>`;
-};
-V.admin.gradebook=()=>{
-  const ready=S.evalScore!==null&&!S.pushed;
-  const g=s=>s>=85?"A+":s>=70?"A":s>=60?"B":"C";
-  return`<div class="head"><div><h2>Credit transfer</h2><p>Internship credits are added after the supervisor evaluation arrives.</p></div></div>
-  <div class="panel"><div class="tw"><table><tr><th>Student</th><th>Hours</th><th>Employer score</th><th>Proposed grade</th><th>Credits</th><th></th></tr>
-  <tr><td>Ramya D.</td><td class="mono">${S.hours}/${REQH}</td><td class="mono">${S.evalScore===null?"Pending":S.evalScore}</td><td class="mono">${S.evalScore===null?"-":g(S.evalScore)}</td><td class="mono">2</td>
-  <td>${S.pushed?'<span class="chip ok">In gradebook</span>':`<button class="btn pri sm" data-act="push" ${ready?"":"disabled"}>Push to gradebook</button>`}</td></tr></table></div>
-  ${!S.noc?'<p class="small muted" style="margin-top:8px">Nothing to transfer yet. Run the flow: apply, get selected, sign NOC, log hours, evaluate.</p>':""}</div>`;
-};
-V.admin.analytics=()=>{
-  const c=STAGES.map((s,i)=>S.apps.filter(a=>a.stage===i).length),max=Math.max(1,...c);
-  const per={};S.apps.forEach(a=>job(a.job).req.forEach(s=>per[s]=(per[s]||0)+1));
-  const top=Object.entries(per).sort((a,b)=>b[1]-a[1]).slice(0,6),tm=Math.max(1,...top.map(x=>x[1]));
-  return`<div class="head"><div><h2>Placement analytics</h2><p>Live from the data in this prototype.</p></div></div>
-  <div class="stats"><div class="panel stat"><b>${S.apps.length}</b><span class="small muted">Applications</span></div><div class="panel stat"><b>${S.employers.filter(e=>e.v).length}</b><span class="small muted">Verified employers</span></div><div class="panel stat"><b>${S.employers.filter(e=>!e.v).length}</b><span class="small muted">Blocked employers</span></div><div class="panel stat"><b>${S.apps.filter(a=>a.stage===3).length}</b><span class="small muted">Students selected</span></div></div>
-  <div class="grid2"><div class="panel"><h3>Applications by stage</h3><div style="display:flex;flex-direction:column;gap:8px">${STAGES.map((s,i)=>`<div class="hbar"><span>${s}</span><div class="bar"><i style="width:${c[i]/max*100}%"></i></div><b class="mono">${c[i]}</b></div>`).join("")}</div></div>
-  <div class="panel"><h3>Most requested skills</h3><div style="display:flex;flex-direction:column;gap:8px">${top.map(([s,n])=>`<div class="hbar"><span>${esc(s)}</span><div class="bar"><i style="width:${n/tm*100}%"></i></div><b class="mono">${n}</b></div>`).join("")}</div></div></div>
-  <p class="small muted">The brief reports a 35% improvement in processing efficiency and about 3 weeks less time-to-hire from institutional testing. This prototype does not measure those figures.</p>`;
-};
-V.admin.emps=()=>`<div class="head"><div><h2>Employers</h2><p>Only verified employers appear in student feeds.</p></div></div>
-  <div class="panel"><div class="tw"><table><tr><th>Employer</th><th>Postings</th><th>Status</th><th>Note</th></tr>${S.employers.map(e=>`<tr><td>${esc(e.n)}</td><td class="mono">${S.jobs.filter(j=>j.e===e.n).length}</td><td><span class="chip ${e.v?"ok":"bad"}">${e.v?"Verified":"Blocked"}</span></td><td class="small muted">${esc(e.why||"")}</td></tr>`).join("")}</table></div></div>`;
+          <div class="form-group">
+            <label for="signupCollege">College name *</label>
+            <input id="signupCollege" type="text" value="Matrusri Engineering College" required>
+          </div>
 
-/* ---------- Actions ---------- */
-function setMsg(from,t){S.msgs.unshift({from,t,ts:now()})}
-document.addEventListener("click",e=>{
-  const t=e.target.closest("button");if(!t)return;
-  if(t.dataset.role){S.role=t.dataset.role;S.view=DEFAULT[S.role];return render()}
-  if(t.dataset.view){S.view=t.dataset.view;return render()}
-  if(t.dataset.go){S.view=t.dataset.go;return render()}
-  if(t.dataset.mode){S.mode=t.dataset.mode;return render()}
-  if(t.dataset.sr){S.signRole=t.dataset.sr;return render()}
-  const a=t.dataset.act;if(!a)return;
-  const st=S.student;
-  if(a==="apply"){const j=job(t.dataset.id);S.apps.push({id:Date.now(),job:j.id,who:"You",stage:0,log:[[0,"Applied"]]});toast("Applied to "+j.t)}
-  else if(a==="rmskill"){st.skills=st.skills.filter(s=>s!==t.dataset.s)}
-  else if(a==="addskill"){const v=$("#addsk")?.value;if(v)st.skills.push(v)}
-  else if(a==="move"){const x=S.apps.find(p=>p.id==t.dataset.id);x.stage++;if(x.who==="You"){setMsg(job(x.job).e,x.stage===3?`Congratulations. You are selected for ${job(x.job).t}. Request your NOC to confirm the start date.`:`Your application for ${job(x.job).t} is now: ${STAGES[x.stage]}.`)}toast(x.who+": "+STAGES[x.stage])}
-  else if(a==="reject"){const x=S.apps.find(p=>p.id==t.dataset.id);x.stage=4;if(x.who==="You")setMsg(job(x.job).e,`Thank you for applying to ${job(x.job).t}. We will not move forward this time.`);toast(x.who+" marked not selected")}
-  else if(a==="reqnoc"){S.noc={signed:[]};setMsg("Placement Cell","NOC requested. It will be signed by your mentor, HOD and the placement officer.");toast("NOC request sent to your mentor")}
-  else if(a==="hours"){S.hours=Math.min(REQH,S.hours+20);toast(S.hours+" hours logged")}
-  else if(a==="analyse"){S.resume=$("#rtext").value;S.resumeJob=$("#rjob").value;S.vres=analyse(S.resume,job(S.resumeJob))}
-  else if(a==="learn"){const c=LEARN.find(x=>x.id===t.dataset.id);S.done.push(c.id);c.skills.forEach(s=>{if(!st.skills.includes(s))st.skills.push(s)});toast("Skills added: "+c.skills.join(", "))}
-  else if(a==="ask"){S.chat.push({t:t.dataset.q},{b:1,t:reply(t.dataset.q)})}
-  else if(a==="badv"){S.vform={n:"QuickHire Solutions",cin:"12345",gst:"ABCDE",web:"quickhire.example",em:"quickhire.jobs@gmail.com"}}
-  else if(a==="push"){S.pushed=true;S.gradebook.push(["Internship (CSE-INT)","2",S.evalScore>=85?"A+":S.evalScore>=70?"A":S.evalScore>=60?"B":"C"]);setMsg("Examination Section","Internship credits were added to your gradebook.");toast("Credits pushed to gradebook")}
-  render();
-});
-document.addEventListener("change",e=>{
-  if(e.target.id==="seljob"){S.selJob=e.target.value;render()}
-});
-document.addEventListener("submit",e=>{
-  e.preventDefault();const id=e.target.id;
-  if(id==="certform"){const cid=$("#cid").value.trim(),iss=$("#ci").value,r=REGISTRY[cid];
-    const ok=!!r&&r.issuer===iss;
-    S.certs.unshift({t:$("#ct").value,i:iss,id:cid,ok,note:ok?"Matches registry. Skill added: "+r.skill:r?"Issuer does not match this ID":"ID not found in registry"});
-    if(ok&&!S.student.skills.includes(r.skill))S.student.skills.push(r.skill)}
-  if(id==="chatform"){const q=$("#chatq").value.trim();if(!q)return;S.chat.push({t:q},{b:1,t:reply(q)})}
-  if(id==="vform"){
-    const f=S.vform={n:$("#vn").value,cin:$("#vc").value.trim(),gst:$("#vg").value.trim(),web:$("#vw").value.trim(),em:$("#ve").value.trim()};
-    const dom=f.em.split("@")[1]||"",free=/^(gmail|yahoo|outlook|hotmail)\./i.test(dom);
-    const c=[["CIN format valid (21 characters)",/^[UL]\d{5}[A-Z]{2}\d{4}[A-Z]{3}\d{6}$/.test(f.cin)],["GSTIN format valid (15 characters)",/^\d{2}[A-Z]{5}\d{4}[A-Z][1-9A-Z]Z[0-9A-Z]$/.test(f.gst)],["HR email uses a company domain, not a free provider",!!dom&&!free],["Email domain matches website",!!dom&&f.web.toLowerCase().replace(/^https?:\/\/(www\.)?/,"")===dom.toLowerCase()]];
-    const ok=c.every(x=>x[1]);S.vres2={ok,c};
-    if(ok&&!emp(f.n))S.employers.push({n:f.n,v:true,cin:f.cin});
-    if(!ok){const x=emp(f.n);if(x)x.v=false}
-    toast(ok?"Employer verified":"Verification failed")}
-  if(id==="pform"){const sk=[...document.querySelectorAll('input[name=rs]:checked')].map(x=>x.value);
-    if(sk.length<2||sk.length>5)return toast("Pick between 2 and 5 skills");
-    S.jobs.push({id:"j"+(S.jobs.length+1),t:$("#pt").value,e:me,req:sk,minCgpa:+$("#pg").value,prereq:$("#pp").value?[$("#pp").value]:[],loc:"Hyderabad · Hybrid",pay:$("#ps").value});
-    toast("Role published. Students see it in their feed.");S.view="pipeline"}
-  if(id==="sform"){const name=$("#sn").value.trim();if(!name)return;const ts=now();S.noc.signed.push({name,ts,h:hash(name+ts+S.noc.signed.length)});
-    if(S.noc.signed.length===3)setMsg("Placement Cell","Your NOC is fully signed. You can start the internship.");
-    else setMsg("Placement Cell",`NOC signed by ${CHAIN[S.noc.signed.length-1]}. Next: ${CHAIN[S.noc.signed.length]}.`);
-    toast("Signed as "+S.signRole)}
-  if(id==="eform"){S.evalScore=+$("#es").value;setMsg(me,"Your internship evaluation was submitted: "+S.evalScore+"/100.");toast("Evaluation sent to faculty")}
-  render();
-});
-render();
-</script>
+          <div class="form-group">
+            <label for="signupDepartment">Department *</label>
+            <select id="signupDepartment" required>
+              <option value="CSE" selected>Computer Science & Engineering (CSE)</option>
+              <option value="IT">Information Technology (IT)</option>
+              <option value="ECE">Electronics & Communication (ECE)</option>
+              <option value="EEE">Electrical & Electronics (EEE)</option>
+              <option value="Data Science">CSE (Data Science)</option>
+              <option value="AI & ML">CSE (AI & Machine Learning)</option>
+              <option value="Mechanical">Mechanical Engineering</option>
+              <option value="Civil">Civil Engineering</option>
+            </select>
+          </div>
+
+          <div class="form-group full-width">
+            <label for="signupGradYear">Graduation year *</label>
+            <select id="signupGradYear" required>
+              <option value="2025">2025</option>
+              <option value="2026">2026</option>
+              <option value="2027" selected>2027</option>
+              <option value="2028">2028</option>
+              <option value="2029">2029</option>
+            </select>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block" id="signupSubmitBtn">Create Account</button>
+        <div class="modal-msg" id="signupMsg" role="status"></div>
+
+        <div class="modal-footer-text">
+          Already have an account? <button type="button" class="btn-link font-bold" id="switchToLogin">Log In</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- C. Forgot Password Modal -->
+  <div id="forgotModal" class="modal-backdrop" hidden>
+    <div class="modal-card" role="dialog" aria-labelledby="forgotTitle" aria-modal="true">
+      <div class="modal-header">
+        <h3 id="forgotTitle">Reset Password</h3>
+        <button type="button" class="modal-close" data-close-modal aria-label="Close dialog">&times;</button>
+      </div>
+      <p class="modal-subtitle">Enter your registered email address and we will send you a password reset link.</p>
+
+      <form id="forgotForm">
+        <div class="form-group">
+          <label for="forgotEmail">Email address</label>
+          <input id="forgotEmail" type="email" placeholder="e.g. ramya.d@student.matrusri.edu.in" required>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block" id="forgotSubmitBtn">Send Reset Link</button>
+        <div class="modal-msg" id="forgotMsg" role="status"></div>
+
+        <div class="modal-footer-text">
+          Remember your password? <button type="button" class="btn-link font-bold" id="forgotBackToLogin">Back to Login</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- D. Student Profile Edit Modal -->
+  <div id="profilePanel" class="modal-backdrop" hidden>
+    <div class="modal-card modal-card-lg" role="dialog" aria-labelledby="profileTitle">
+      <div class="modal-header">
+        <h3 id="profileTitle">Student Profile</h3>
+        <button type="button" class="modal-close" id="profileClose" aria-label="Close profile">&times;</button>
+      </div>
+      <p class="modal-subtitle">Your student information is synchronized with your Supabase profile record.</p>
+
+      <form id="profileForm">
+        <div class="form-group">
+          <label for="pfName">Full name</label>
+          <input id="pfName" required>
+        </div>
+
+        <div class="form-group">
+          <label for="pfEmail">Email address</label>
+          <input id="pfEmail" type="email" readonly style="opacity:0.75;cursor:not-allowed;">
+        </div>
+
+        <div class="form-group">
+          <label for="pfCollege">College name</label>
+          <input id="pfCollege" required>
+        </div>
+
+        <div class="form-group">
+          <label for="pfDepartment">Department</label>
+          <input id="pfDepartment" required>
+        </div>
+
+        <div class="form-group">
+          <label for="pfYear">Graduation year</label>
+          <input id="pfYear" type="number" min="2020" max="2100" required>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block" style="margin-top:6px;">Save Profile</button>
+        <div class="modal-msg" id="profileMessage" role="status"></div>
+      </form>
+    </div>
+  </div>
 
 
-<!-- Supabase client library -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script>
-// Replace these two placeholders with your Supabase Project URL and Publishable key.
-// Never put your Supabase Secret/service_role key in this file.
-const SUPABASE_URL = "https://jbjfbczsxezptvhswfmm.supabase.co";
-const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_QhEWhEnwiVutvWyR983O0w_itQJZaWQ";
+  <!-- ======================================================================
+       3. ORIGINAL SMART INTERNSHIP PORTAL DASHBOARD (PRESERVED)
+       ====================================================================== -->
+  <div id="dashboardApp" hidden>
+    <header class="top">
+      <div class="top-in">
+        <div class="brand">
+          <b>Smart Internship Portal</b>
+          <span>Matrusri Engineering College · CSE · Team D07 · interactive prototype with sample data</span>
+        </div>
+        <div id="accountControls">
+          <button id="profileOpen" type="button">My profile</button>
+          <button id="signOutBtn" type="button">Sign out</button>
+          <div class="seg" role="group" aria-label="View as" id="roles"></div>
+        </div>
+      </div>
+    </header>
 
-(() => {
- const gate=document.getElementById('authGate');
- const authForm=document.getElementById('authForm');
- const authMessage=document.getElementById('authMessage');
- const authToggle=document.getElementById('authToggle');
- const authSubmit=document.getElementById('authSubmit');
- const signupNameWrap=document.getElementById('signupNameWrap');
- const profilePanel=document.getElementById('profilePanel');
- const profileMessage=document.getElementById('profileMessage');
- let isSignup=false, client=null, currentUser=null;
- const say=(el,msg)=>{el.textContent=msg||''};
- const configured=()=>SUPABASE_URL.startsWith('https://') && SUPABASE_PUBLISHABLE_KEY.length>20 && !SUPABASE_URL.includes('PASTE_') && !SUPABASE_PUBLISHABLE_KEY.includes('PASTE_');
- function showApp(){gate.hidden=true;document.getElementById('profileOpen').hidden=false;document.getElementById('signOutBtn').hidden=false;}
- function showAuth(){gate.hidden=false;document.getElementById('profileOpen').hidden=true;document.getElementById('signOutBtn').hidden=true;}
- async function loadProfile(){
-  const {data,error}=await client.from('students').select('*').eq('user_id',currentUser.id).maybeSingle();
-  if(error){console.error(error);toast('Could not load profile. Check students table policies.');return;}
-  document.getElementById('pfName').value=data?.full_name||currentUser.user_metadata?.full_name||'';
-  document.getElementById('pfEmail').value=currentUser.email||'';
-  document.getElementById('pfCollege').value=data?.college||'';
-  document.getElementById('pfDepartment').value=data?.department||'CSE';
-  document.getElementById('pfYear').value=data?.graduation_year||new Date().getFullYear()+3;
-  if(data?.full_name) S.student.name=data.full_name;
-  if(data?.full_name) S.resume=S.resume.replace(/^.*$/m,data.full_name);
-  if(!data?.college || !data?.department || !data?.graduation_year){profilePanel.classList.add('open');profilePanel.setAttribute('aria-hidden','false');}
- }
- async function handleSession(session){
-  if(!session?.user){currentUser=null;showAuth();return;}
-  currentUser=session.user;showApp();await loadProfile();
- }
- authToggle.addEventListener('click',()=>{
-  isSignup=!isSignup;signupNameWrap.hidden=!isSignup;
-  document.getElementById('authTitle').textContent=isSignup?'Create your student account':'Welcome to Smart Internship Portal';
-  document.getElementById('authIntro').textContent=isSignup?'Use your college email if available. You may need to confirm your email before logging in.':'Log in to access your student dashboard.';
-  authSubmit.textContent=isSignup?'Create account':'Log in';authToggle.textContent=isSignup?'Back to login':'Create account';
-  document.getElementById('authPassword').autocomplete=isSignup?'new-password':'current-password';say(authMessage,'');
- });
- authForm.addEventListener('submit',async e=>{
-  e.preventDefault();say(authMessage,'');
-  if(!client){say(authMessage,'Supabase is not configured. Add your Project URL and Publishable key in the code first.');return;}
-  const email=document.getElementById('authEmail').value.trim();
-  const password=document.getElementById('authPassword').value;
-  authSubmit.disabled=true;
-  try{
-   if(isSignup){
-    const full_name=document.getElementById('authName').value.trim();
-    if(!full_name){say(authMessage,'Enter your full name.');return;}
-    const {data,error}=await client.auth.signUp({email,password,options:{data:{full_name}}});
-    if(error) throw error;
-    if(data.session){await handleSession(data.session);toast('Account created. Complete your profile.');}
-    else say(authMessage,'Account created. Check your email to confirm it, then log in.');
-   }else{
-    const {data,error}=await client.auth.signInWithPassword({email,password});
-    if(error) throw error;
-    await handleSession(data.session);toast('Logged in successfully.');
-   }
-  }catch(err){say(authMessage,err.message||'Authentication failed.');}
-  finally{authSubmit.disabled=false;}
- });
- document.getElementById('profileOpen').addEventListener('click',()=>{profilePanel.classList.add('open');profilePanel.setAttribute('aria-hidden','false');});
- document.getElementById('profileClose').addEventListener('click',()=>{profilePanel.classList.remove('open');profilePanel.setAttribute('aria-hidden','true');});
- profilePanel.addEventListener('click',e=>{if(e.target===profilePanel){profilePanel.classList.remove('open');profilePanel.setAttribute('aria-hidden','true');}});
- document.getElementById('profileForm').addEventListener('submit',async e=>{
-  e.preventDefault();say(profileMessage,'');if(!currentUser)return;
-  const row={user_id:currentUser.id,full_name:document.getElementById('pfName').value.trim(),email:currentUser.email,college:document.getElementById('pfCollege').value.trim(),department:document.getElementById('pfDepartment').value.trim(),graduation_year:Number(document.getElementById('pfYear').value)};
-  const {error}=await client.from('students').upsert(row,{onConflict:'user_id'});
-  if(error){say(profileMessage,error.message);return;}
-  S.student.name=row.full_name;toast('Student profile saved.');profilePanel.classList.remove('open');profilePanel.setAttribute('aria-hidden','true');
- });
- document.getElementById('signOutBtn').addEventListener('click',async()=>{const {error}=await client.auth.signOut();if(error){toast(error.message);return;}showAuth();toast('Signed out.');});
- async function init(){
-  if(!configured() || !window.supabase){say(authMessage,'Website setup needed: add your Supabase Project URL and Publishable key to index.html.');return;}
-  client=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
-  const {data:{session}}=await client.auth.getSession();await handleSession(session);
-  client.auth.onAuthStateChange((_event,session)=>{handleSession(session);});
- }
- init();
-})();
-</script>
+    <div class="shell">
+      <nav id="nav" aria-label="Sections"></nav>
+      <main id="main"></main>
+    </div>
+  </div>
+
+  <!-- Global Toast Notification -->
+  <div class="toast" id="toast" hidden></div>
+
+
+  <!-- ======================================================================
+       4. SCRIPTS
+       ====================================================================== -->
+  <!-- Supabase JS Client Library -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- Original Application Core Logic -->
+  <script src="js/app.js"></script>
+  <!-- Supabase Authentication & Navigation Flow Integration -->
+  <script src="js/supabase.js"></script>
 
 </body>
 </html>

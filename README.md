@@ -38,13 +38,14 @@ A data-driven academic internship platform engineered to bridge the gap between 
 ```
 smart-internship-portal/
 ├── frontend/                                # Frontend Application
-│   ├── index.html                           # Main web app with Supabase Auth & Profile Modal
+│   ├── index.html                           # Welcome Page & Embedded Original Dashboard
 │   ├── prototype.html                       # Standalone offline prototype
+│   ├── _redirects                           # Netlify SPA routing rules
 │   ├── css/
-│   │   └── styles.css                       # Application stylesheet
+│   │   └── styles.css                       # Master application & landing stylesheet
 │   └── js/
-│       ├── app.js                           # Core frontend application logic
-│       └── supabase.js                      # Supabase authentication & profile handling
+│       ├── app.js                           # Core frontend application logic & UI renderer
+│       └── supabase.js                      # Supabase auth, modal routing & profile handling
 │
 ├── backend/                                 # Backend REST API Server (Node.js / Express)
 │   ├── server.js                            # Express application entry point
@@ -79,7 +80,8 @@ smart-internship-portal/
 │   ├── Smart Internship Portal.md           # Mini-project synopsis
 │   └── ARCHITECTURE.md                      # Detailed technical architecture & viva notes
 │
-├── index.html                               # Root launcher / redirect to frontend/index.html
+├── index.html                               # Root launcher / instant redirect to frontend
+├── netlify.toml                             # Netlify automated deployment configuration
 ├── .gitignore                               # Standard git ignore file
 └── README.md                                # Master project documentation
 ```
@@ -88,7 +90,11 @@ smart-internship-portal/
 
 ## ⚡ Core Features & Modules
 
-1. **Semantic Skill-Graph Matching Engine**:
+1. **Modern Welcome / Landing Page & Dialog Flow**:
+   - Modern, responsive landing page with hero section, 6-step *How It Works* interactive pipeline, platform features, institutional information, stakeholder benefits, and CTA banner.
+   - Secure dialog modals for **Student Login**, **Create Account** (with confirmation & college fields), and **Password Reset** powered by Supabase Auth.
+   - Smooth transition into the original dashboard upon authentication, and a one-click **Sign out** returning to the Welcome Page.
+2. **Semantic Skill-Graph Matching Engine**:
    - Represents skills as graph nodes and semantic affinities as weighted edges.
    - Computes transitive closure to match candidates with roles (e.g., Python $\rightarrow$ Django/Flask at 80% match).
 2. **Automated Eligibility Screener**:

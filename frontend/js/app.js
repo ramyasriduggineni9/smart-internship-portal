@@ -330,4 +330,7 @@ document.addEventListener("submit",e=>{
   if(id==="eform"){S.evalScore=+$("#es").value;setMsg(me,"Your internship evaluation was submitted: "+S.evalScore+"/100.");toast("Evaluation sent to faculty")}
   render();
 });
+window.S = S;
+window.renderDashboard = render;
+window.showToast = toast;
 render();
