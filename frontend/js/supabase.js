@@ -113,11 +113,11 @@ const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_QhEWhEnwiVutvWyR983O0w_itQJZaWQ
         console.warn('Could not query students table:', error.message);
       }
 
-      const fullName = data?.full_name || currentUser.user_metadata?.full_name || 'Duggineni Ramya';
-      const email = currentUser.email || 'ramya.d@student.matrusri.edu.in';
-      const college = data?.college || currentUser.user_metadata?.college || 'Matrusri Engineering College';
-      const department = data?.department || currentUser.user_metadata?.department || 'CSE';
-      const gradYear = data?.graduation_year || currentUser.user_metadata?.graduation_year || 2027;
+      const fullName = data?.full_name || currentUser.user_metadata?.full_name || '';
+      const email = currentUser.email || '';
+      const college = data?.college || currentUser.user_metadata?.college || '';
+      const department = data?.department || currentUser.user_metadata?.department || '';
+      const gradYear = data?.graduation_year || currentUser.user_metadata?.graduation_year || '';
 
       // Populate profile dialog inputs
       const pfName = document.getElementById('pfName');

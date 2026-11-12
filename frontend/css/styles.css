@@ -984,9 +984,9 @@ button, input, select, textarea {
   position: fixed;
   inset: 0;
   z-index: 2000;
-  background: rgba(10, 24, 22, 0.65);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
+  background: linear-gradient(135deg, rgba(5, 38, 34, 0.88) 0%, rgba(11, 107, 99, 0.72) 60%, rgba(24, 141, 131, 0.60) 100%);
+  backdrop-filter: blur(10px) saturate(1.4);
+  -webkit-backdrop-filter: blur(10px) saturate(1.4);
   display: grid;
   place-items: center;
   padding: 18px;
@@ -1001,17 +1001,38 @@ button, input, select, textarea {
   width: min(100%, 460px);
   max-height: 92vh;
   overflow-y: auto;
-  background: var(--surface);
+  background: #ffffff;
   color: var(--ink);
-  border: 1px solid var(--line);
-  border-radius: 16px;
-  padding: 28px;
-  box-shadow: var(--shadow-xl);
+  border: 1px solid rgba(11, 107, 99, 0.18);
+  border-radius: 20px;
+  padding: 32px 30px 28px;
+  box-shadow: 0 24px 60px rgba(5, 38, 34, 0.30), 0 4px 16px rgba(11, 107, 99, 0.12);
   display: flex;
   flex-direction: column;
   gap: 16px;
   position: relative;
-  animation: modalFadeIn 0.22s ease-out;
+  animation: modalFadeIn 0.24s ease-out;
+  overflow: hidden;
+}
+
+.modal-card::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 5px;
+  background: linear-gradient(90deg, #0b6b63 0%, #188d83 50%, #1aa99d 100%);
+  border-radius: 20px 20px 0 0;
+  pointer-events: none;
+}
+
+.modal-card::after {
+  content: "";
+  position: absolute;
+  top: -60px; right: -60px;
+  width: 180px; height: 180px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(11, 107, 99, 0.07) 0%, transparent 70%);
+  pointer-events: none;
 }
 
 .modal-card.modal-card-lg {
@@ -1036,8 +1057,12 @@ button, input, select, textarea {
 }
 
 .modal-header h3 {
-  font-size: 21px;
-  font-weight: 700;
+  font-size: 22px;
+  font-weight: 800;
+  background: linear-gradient(135deg, #0b6b63 0%, #188d83 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .modal-close {
@@ -1104,6 +1129,8 @@ button, input, select, textarea {
 .form-group select:focus,
 .form-group textarea:focus {
   border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(11, 107, 99, 0.12);
+  outline: none;
 }
 
 .form-grid {
