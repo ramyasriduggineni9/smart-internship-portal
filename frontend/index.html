@@ -17,16 +17,13 @@
     <header class="welcome-nav">
       <div class="welcome-nav-container">
         <a href="#welcomePage" class="welcome-brand">
-          <div class="brand-icon-wrap">
+          <div class="brand-icon-wrap" aria-hidden="true">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
               <path d="M6 12v5c3 3 9 3 12 0v-5"/>
             </svg>
           </div>
-          <div>
-            <span class="brand-title">Smart Internship Portal</span>
-            <span class="brand-subtitle">AI-Powered Internship Platform</span>
-          </div>
+          <span class="brand-title">Smart Internship Portal</span>
         </a>
 
         <nav class="welcome-nav-links" aria-label="Landing Page Navigation">
@@ -37,78 +34,44 @@
         </nav>
 
         <div class="welcome-nav-actions">
-          <button type="button" class="btn btn-outline" id="navLoginBtn">Log In</button>
-          <button type="button" class="btn btn-primary" id="navSignupBtn">Create Account</button>
+          <a href="#studentLogin" class="btn btn-nav-outline" id="navLoginBtn">Log In</a>
+          <button type="button" class="btn btn-nav-primary" id="navSignupBtn">Create Account</button>
         </div>
       </div>
     </header>
 
-    <!-- Hero Section -->
-    <section class="hero-section">
-      <div class="hero-content">
-        <div class="hero-badge">
-          <span class="badge-dot"></span>
-          AI Skill-Graph Matching · IEEE Research Foundation
-        </div>
-        <h1 class="hero-title">
-          Build Your Skills.<br>
-          <span class="accent-text">Discover Opportunities.</span><br>
-          Shape Your Career.
-        </h1>
-        <p class="hero-desc">
-          Your one-stop platform connecting students, academic institutions and industries through intelligent skill mapping, internship opportunities and career development.
-        </p>
-        <div class="hero-cta-group">
-          <button type="button" class="btn btn-primary btn-lg" id="heroGetStartedBtn">Get Started Free →</button>
-          <button type="button" class="btn btn-secondary btn-lg" id="heroLoginBtn">Student Login</button>
-          <a href="#how-it-works" class="hero-link">See How It Works ↓</a>
-        </div>
-        <div class="hero-pills">
-          <span class="pill">✓ Semantic Skill Matching</span>
-          <span class="pill">✓ Verified MCA Employers</span>
-          <span class="pill">✓ Real-time Kanban</span>
-          <span class="pill">✓ Digital NOC E-Signatures</span>
-          <span class="pill">✓ Academic Credit Transfer</span>
-        </div>
+    <!-- Login -->
+    <section class="login-stage" id="studentLogin">
+      <div class="login-stage-copy">
+        <p class="login-kicker">Matrusri Engineering College · Department of CSE</p>
+        <h1>Smart Internship Portal</h1>
+        <p class="login-lead">Find internships, apply in one place, track every stage, and carry the hours into your academic record.</p>
+        <ul class="login-points">
+          <li>Verified employer listings</li>
+          <li>Application status in one view</li>
+          <li>Digital NOC and credit sync</li>
+        </ul>
       </div>
 
-      <!-- Hero Visual Live Snapshot Card -->
-      <div class="hero-visual">
-        <div class="hero-card">
-          <div class="card-header-row">
-            <div class="card-title-group">
-              <h4>Knowledge-Graph Skill Match</h4>
-              <span>Candidate vs. Role Proximity</span>
-            </div>
-            <div class="hero-stat-badge">88% Match</div>
+      <div class="login-panel">
+        <h2>Student Login</h2>
+        <p class="login-panel-note">Use the email and password for your student account.</p>
+        <form id="loginForm">
+          <div class="form-group">
+            <label for="loginEmail">Email address</label>
+            <input id="loginEmail" type="email" placeholder="you@college.edu" autocomplete="email" required>
           </div>
-
-          <div class="hero-graph-preview">
-            <div class="hero-nodes-row">
-              <div class="hero-node">Python (Student)</div>
-              <div class="hero-node">Flask</div>
-              <div class="hero-node target">Django (Target)</div>
+          <div class="form-group">
+            <div class="label-row">
+              <label for="loginPassword">Password</label>
+              <button type="button" class="btn-link small" id="openForgotBtn">Forgot password?</button>
             </div>
-            <p class="small muted" style="text-align:center;">
-              Semantic link: <b>Python → Django</b> (80% affinity via Knowledge Graph)
-            </p>
+            <input id="loginPassword" type="password" placeholder="Enter your password" autocomplete="current-password" required>
           </div>
-
-          <div class="hero-kanban-mini">
-            <div class="mini-col">
-              <span>Applied</span>
-              <div class="mini-item">Backend Intern</div>
-            </div>
-            <div class="mini-col">
-              <span>Interview</span>
-              <div class="mini-item highlight">Orbit Digital</div>
-            </div>
-            <div class="mini-col">
-              <span>Credits</span>
-              <div class="mini-item">2 Credits Sync</div>
-            </div>
-          </div>
-        </div>
+          <button type="submit" class="btn btn-primary btn-block" id="loginSubmitBtn">Log In</button>
+          <div class="modal-msg" id="loginMsg" role="status"></div>
+          <p class="login-switch">New here? <button type="button" class="btn-link font-bold" id="switchToSignup">Create an account</button></p>
+        </form>
       </div>
     </section>
 
@@ -148,7 +111,7 @@
             <div class="step-icon">🔍</div>
           </div>
           <h3>Discover Internships</h3>
-          <p>Explore internship opportunities dynamically ranked by knowledge-graph semantic match scores.</p>
+          <p>Browse open roles from verified employers and filter by role, department, and eligibility.</p>
         </div>
 
         <!-- Step 4 -->
@@ -186,20 +149,12 @@
     <!-- Key Features Section -->
     <section id="features" class="landing-section">
       <div class="section-header">
-        <span class="section-eyebrow">INTELLIGENT ARCHITECTURE</span>
+        <span class="section-eyebrow">WHAT YOU CAN DO</span>
         <h2>Key Platform Features</h2>
-        <p>Engineered to eliminate friction, manual paperwork, and application black holes.</p>
+        <p>Built to cut paperwork and keep every application visible from submit to credit.</p>
       </div>
 
       <div class="features-grid">
-        <div class="feature-box">
-          <div class="feature-icon-wrap">🌐</div>
-          <div class="feature-info">
-            <h3>Semantic Skill-Graph Matching</h3>
-            <p>Maps skills into an interconnected knowledge graph, computing transitive affinity beyond rigid literal keyword matches.</p>
-          </div>
-        </div>
-
         <div class="feature-box">
           <div class="feature-icon-wrap">🛡️</div>
           <div class="feature-info">
@@ -273,19 +228,6 @@
             </div>
           </div>
         </div>
-
-        <div class="about-card">
-          <span class="paper-badge">RESEARCH FOUNDATION</span>
-          <h3>IEEE Base Paper Alignment</h3>
-          <p>
-            The intelligence layer is grounded in the IEEE ICMNWC 2025 research paper:
-            <i>"Skill-Based Recommender System for Internship and Industry Hiring using Knowledge Graphs"</i>
-            (DOI: <code>10.1109/ICMNWC66779.2025.11354307</code>).
-          </p>
-          <p>
-            While the base paper introduces graph-based skill proximity, our Smart Internship Portal extends this model into an end-to-end university ecosystem with real-world Supabase authentication, institutional NOC approval chains, and automated gradebook sync.
-          </p>
-        </div>
       </div>
     </section>
 
@@ -303,9 +245,9 @@
           <div class="benefit-icon">🎓</div>
           <h3>For Students</h3>
           <ul class="benefit-list">
-            <li>Intelligent recommendations based on your actual skills, not just job titles</li>
+            <li>Internship listings you can filter by role, department, and eligibility</li>
             <li>No more application black holes with live Kanban status tracking</li>
-            <li>Instant ATS resume feedback and personalized skill-gap course recommendations</li>
+            <li>A single place to update your profile, skills, and application documents</li>
             <li>Seamless paperless NOC approval and guaranteed 2 academic credits</li>
           </ul>
         </div>
@@ -328,7 +270,7 @@
           <h3>For Employers</h3>
           <ul class="benefit-list">
             <li>Direct access to pre-screened students meeting exact academic criteria</li>
-            <li>Semantic skill matching reducing time-to-hire by an average of 3 weeks</li>
+            <li>Applicants who already meet the academic requirements for the role</li>
             <li>Structured evaluation portal for submitting performance scores</li>
             <li>Verified company profile badge building trust with prospective talent</li>
           </ul>
@@ -340,10 +282,10 @@
     <div style="max-width: 1240px; margin: 0 auto;">
       <section class="section-cta">
         <h2>Ready to Accelerate Your Career Journey?</h2>
-        <p>Join Smart Internship Portal today and experience intelligent, friction-free internship discovery and academic credit workflows.</p>
+        <p>Create a student account or sign in to browse internships and track your applications.</p>
         <div class="hero-cta-group">
           <button type="button" class="btn btn-cta-white" id="ctaGetStartedBtn">Create Student Account →</button>
-          <button type="button" class="btn btn-cta-ghost" id="ctaLoginBtn">Sign In to Portal</button>
+          <a href="#studentLogin" class="btn btn-cta-ghost" id="ctaLoginBtn">Sign In to Portal</a>
         </div>
       </section>
     </div>
@@ -355,7 +297,7 @@
           <div class="welcome-brand">
             <div class="brand-icon-wrap" style="width:34px;height:34px;font-size:16px;">🎓</div>
             <div>
-              <span class="brand-title" style="font-size:17px;">Smart Internship Portal</span>
+              <span class="brand-title footer-brand-title">Smart Internship Portal</span>
               <span class="brand-subtitle">Matrusri Engineering College</span>
             </div>
           </div>
@@ -392,7 +334,7 @@
 
       <div class="footer-bottom">
         <div>© 2026 Smart Internship Portal · Matrusri Engineering College (CSE). All rights reserved.</div>
-        <div>Built with Supabase Authentication & IEEE Knowledge-Graph Architecture</div>
+        <div>Department of CSE · Team D07</div>
       </div>
     </footer>
   </div>
@@ -402,39 +344,6 @@
        2. MODALS / DIALOG BOXES
        ====================================================================== -->
 
-  <!-- A. Student Login Modal -->
-  <div id="loginModal" class="modal-backdrop" hidden>
-    <div class="modal-card" role="dialog" aria-labelledby="loginTitle" aria-modal="true">
-      <div class="modal-header">
-        <h3 id="loginTitle">Student Login</h3>
-        <button type="button" class="modal-close" data-close-modal aria-label="Close dialog">&times;</button>
-      </div>
-      <p class="modal-subtitle">Log in to your Smart Internship Portal student dashboard.</p>
-      
-      <form id="loginForm">
-        <div class="form-group">
-          <label for="loginEmail">Email address</label>
-          <input id="loginEmail" type="email" placeholder="Enter your email address" autocomplete="email" required>
-        </div>
-
-        <div class="form-group">
-          <div class="label-row">
-            <label for="loginPassword">Password</label>
-            <button type="button" class="btn-link small" id="openForgotBtn">Forgot password?</button>
-          </div>
-          <input id="loginPassword" type="password" placeholder="Enter your password" autocomplete="current-password" required>
-        </div>
-
-        <button type="submit" class="btn btn-primary btn-block" id="loginSubmitBtn">Log In</button>
-        <div class="modal-msg" id="loginMsg" role="status"></div>
-
-        <div class="modal-footer-text">
-          Don't have an account? <button type="button" class="btn-link font-bold" id="switchToSignup">Create Account</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
   <!-- B. Student Create Account Modal -->
   <div id="signupModal" class="modal-backdrop" hidden>
     <div class="modal-card modal-card-lg" role="dialog" aria-labelledby="signupTitle" aria-modal="true">
@@ -442,7 +351,7 @@
         <h3 id="signupTitle">Create Student Account</h3>
         <button type="button" class="modal-close" data-close-modal aria-label="Close dialog">&times;</button>
       </div>
-      <p class="modal-subtitle">Register to unlock personalized skill-graph matching, verified internships, and academic credit sync.</p>
+      <p class="modal-subtitle">Register to browse verified internships, track applications, and sync academic credit.</p>
 
       <form id="signupForm">
         <div class="form-grid">
@@ -501,7 +410,7 @@
         <div class="modal-msg" id="signupMsg" role="status"></div>
 
         <div class="modal-footer-text">
-          Already have an account? <button type="button" class="btn-link font-bold" id="switchToLogin">Log In</button>
+          Already have an account? <a href="#studentLogin" class="btn-link font-bold" id="switchToLogin">Log In</a>
         </div>
       </form>
     </div>

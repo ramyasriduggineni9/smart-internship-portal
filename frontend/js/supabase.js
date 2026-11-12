@@ -13,7 +13,6 @@ const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_QhEWhEnwiVutvWyR983O0w_itQJZaWQ
   const dashboardApp = document.getElementById('dashboardApp');
 
   // Modals
-  const loginModal = document.getElementById('loginModal');
   const signupModal = document.getElementById('signupModal');
   const forgotModal = document.getElementById('forgotModal');
   const profilePanel = document.getElementById('profilePanel');
@@ -75,10 +74,19 @@ const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_QhEWhEnwiVutvWyR983O0w_itQJZaWQ
   }
 
   function closeAllModals() {
-    [loginModal, signupModal, forgotModal, profilePanel].forEach(m => {
+    [signupModal, forgotModal, profilePanel].forEach(m => {
       if (m) m.hidden = true;
     });
     document.body.style.overflow = '';
+  }
+
+  function focusLogin(email) {
+    closeAllModals();
+    const loginEmailInput = document.getElementById('loginEmail');
+    const stage = document.getElementById('studentLogin');
+    if (email && loginEmailInput) loginEmailInput.value = email;
+    if (stage) stage.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    if (loginEmailInput) setTimeout(() => loginEmailInput.focus(), 280);
   }
 
   /* ---------- Page View Transitions ---------- */
@@ -290,10 +298,8 @@ const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_QhEWhEnwiVutvWyR983O0w_itQJZaWQ
         } else {
           say(signupMsg, 'Account created! Please check your email inbox to verify your address, then log in.', false);
           setTimeout(() => {
-            openModal(loginModal);
-            const loginEmailInput = document.getElementById('loginEmail');
-            if (loginEmailInput) loginEmailInput.value = email;
-            say(loginMsg, 'Account created! Please check your email or log in.', false);
+            focusLogin(email);
+            say(loginMsg, 'Account created. Check your email, then log in.', false);
           }, 2400);
         }
       } catch (err) {
@@ -417,9 +423,9 @@ const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_QhEWhEnwiVutvWyR983O0w_itQJZaWQ
   /* ---------- Modal Triggers on Welcome Page ---------- */
   document.addEventListener('click', (e) => {
     // Open Login Modal
-    if (e.target.closest('#navLoginBtn, #heroLoginBtn, #ctaLoginBtn, #switchToLogin, #forgotBackToLogin')) {
+    if (e.target.closest('#navLoginBtn, #ctaLoginBtn, #switchToLogin, #forgotBackToLogin')) {
       e.preventDefault();
-      openModal(loginModal);
+      focusLogin();
       return;
     }
 
@@ -458,7 +464,7 @@ const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_QhEWhEnwiVutvWyR983O0w_itQJZaWQ
   });
 
   /* ---------- Global Exports & Initialization ---------- */
-  window.openLoginModal = () => openModal(loginModal);
+  window.openLoginModal = () => focusLogin();
   window.openSignupModal = () => openModal(signupModal);
   window.showDashboard = showDashboard;
   window.showWelcome = showWelcome;
