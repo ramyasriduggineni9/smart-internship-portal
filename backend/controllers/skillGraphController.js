@@ -119,3 +119,4 @@ exports.matchSkills = (req, res) => {
 };
 
 exports.calculateSkillMatch = calculateSkillMatch;
+

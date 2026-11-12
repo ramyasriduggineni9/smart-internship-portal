@@ -12,3 +12,4 @@ router.post('/credits/log-hours', approvalController.logHours);
 router.post('/credits/push-gradebook', approvalController.pushToGradebook);
 
 module.exports = router;
+

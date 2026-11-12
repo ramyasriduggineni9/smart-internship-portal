@@ -6,3 +6,4 @@ router.get('/', internshipController.getAllInternships);
 router.post('/', internshipController.createInternship);
 
 module.exports = router;
+

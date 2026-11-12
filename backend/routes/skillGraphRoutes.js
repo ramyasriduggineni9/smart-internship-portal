@@ -6,3 +6,4 @@ router.get('/graph', skillGraphController.getSkillGraph);
 router.post('/match', skillGraphController.matchSkills);
 
 module.exports = router;
+

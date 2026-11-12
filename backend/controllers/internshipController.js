@@ -103,3 +103,4 @@ exports.createInternship = (req, res) => {
   internships.push(newJob);
   res.status(201).json(newJob);
 };
+

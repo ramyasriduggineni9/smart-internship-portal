@@ -113,3 +113,4 @@ FOR ALL USING (auth.uid() = user_id);
 -- Allow students to view and manage their applications
 CREATE POLICY "Students manage applications" ON public.applications 
 FOR ALL USING (student_id IN (SELECT id FROM public.students WHERE user_id = auth.uid()));
+

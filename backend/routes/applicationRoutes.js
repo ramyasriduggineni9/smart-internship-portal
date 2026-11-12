@@ -7,3 +7,4 @@ router.post('/', applicationController.applyToJob);
 router.patch('/:id/stage', applicationController.updateStage);
 
 module.exports = router;
+

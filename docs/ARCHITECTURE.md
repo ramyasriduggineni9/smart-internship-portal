@@ -85,3 +85,4 @@ Each signature computes a cryptographic tamper-evident hash token.
 
 ### Module 5: Automated Academic Credit Transfer
 Tracks verified internship hours logged by students (target: 160 hours). Once the supervisor submits the performance evaluation score, the system automatically calculates the letter grade and syncs the 2 academic credits directly into the university gradebook.
+

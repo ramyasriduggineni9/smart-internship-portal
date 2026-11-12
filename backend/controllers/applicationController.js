@@ -69,3 +69,4 @@ exports.updateStage = (req, res) => {
   app.logs.push([nextStage, STAGES[nextStage]]);
   res.json(app);
 };
+

@@ -57,3 +57,4 @@ exports.verifyEmployer = (req, res) => {
 
   res.json(employerRecord);
 };
+

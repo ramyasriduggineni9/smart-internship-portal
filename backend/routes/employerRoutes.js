@@ -6,3 +6,4 @@ router.get('/', employerController.getEmployers);
 router.post('/verify', employerController.verifyEmployer);
 
 module.exports = router;
+

@@ -32,3 +32,4 @@ exports.updateProfile = async (req, res) => {
     profile: currentStudentProfile
   });
 };
+

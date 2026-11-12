@@ -19,3 +19,4 @@ This directory houses the foundational datasets used by the **Smart Internship P
 - **Purpose**:
   - Forms the backbone of the **Semantic Skill-Graph Matching Engine**.
   - Enables the portal to identify related competencies (e.g., matching a candidate skilled in *Python* with a role requiring *Django* or *Flask* via semantic transitive paths) instead of failing on rigid keyword matches.
+
