@@ -1,6 +1,6 @@
 /**
  * Supabase Authentication & Profile Integration
- * Smart Internship Portal - Matrusri Engineering College CSE Team D07
+ * Smart Internship Portal
  */
 
 // Supabase Configuration

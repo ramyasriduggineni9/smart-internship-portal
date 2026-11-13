@@ -22,10 +22,10 @@ const REGISTRY={"NPTEL-PY-2026-04171":{issuer:"NPTEL",skill:"Python"},"COURSERA-
 const S={
  role:"student",view:"feed",mode:"graph",signRole:"Mentor",selJob:"j1",resumeJob:"j1",resume:
 `DUGGINENI RAMYA
-ramya.d@student.matrusri.edu.in | Hyderabad
+ramya.d@student.portal.edu | Hyderabad
 
 EDUCATION
-B.E. Computer Science and Engineering, Matrusri Engineering College, CGPA 8.2
+B.E. Computer Science and Engineering, CGPA 8.2
 
 PROJECTS
 Campus Notice Board: Flask web app with SQL storage, used by 340 students.
@@ -55,7 +55,7 @@ Python, Flask, SQL, HTML, CSS, Git`,
 };
 const STAGES=["Applied","Under review","Interview scheduled","Selected","Not selected"];
 const CHAIN=["Mentor","HOD","Placement Officer"];
-const SIGNERS={"Mentor":"Prof. A.V. Murali Krishna","HOD":"HOD, Dept. of CSE","Placement Officer":"Training and Placement Officer"};
+const SIGNERS={"Mentor":"Faculty Mentor","HOD":"Department Head","Placement Officer":"Training & Placement Officer"};
 const REQH=120;
 
 /* ---------- Helpers ---------- */
@@ -298,7 +298,7 @@ document.addEventListener("click",e=>{
   else if(a==="learn"){const c=LEARN.find(x=>x.id===t.dataset.id);S.done.push(c.id);c.skills.forEach(s=>{if(!st.skills.includes(s))st.skills.push(s)});toast("Skills added: "+c.skills.join(", "))}
   else if(a==="ask"){S.chat.push({t:t.dataset.q},{b:1,t:reply(t.dataset.q)})}
   else if(a==="badv"){S.vform={n:"QuickHire Solutions",cin:"12345",gst:"ABCDE",web:"quickhire.example",em:"quickhire.jobs@gmail.com"}}
-  else if(a==="push"){S.pushed=true;S.gradebook.push(["Internship (CSE-INT)","2",S.evalScore>=85?"A+":S.evalScore>=70?"A":S.evalScore>=60?"B":"C"]);setMsg("Examination Section","Internship credits were added to your gradebook.");toast("Credits pushed to gradebook")}
+  else if(a==="push"){S.pushed=true;S.gradebook.push(["Internship Credits","2",S.evalScore>=85?"A+":S.evalScore>=70?"A":S.evalScore>=60?"B":"C"]);setMsg("Examination Section","Internship credits were added to your gradebook.");toast("Credits pushed to gradebook")}
   render();
 });
 document.addEventListener("change",e=>{
