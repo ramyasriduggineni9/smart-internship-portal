@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -455,27 +455,27 @@
       <form id="profileForm">
         <div class="form-group">
           <label for="pfName">Full name</label>
-          <input id="pfName" required>
+          <input id="pfName" type="text" placeholder="e.g. Priya Sharma" autocomplete="name" required>
         </div>
 
         <div class="form-group">
           <label for="pfEmail">Email address</label>
-          <input id="pfEmail" type="email" readonly style="opacity:0.75;cursor:not-allowed;">
+          <input id="pfEmail" type="email" placeholder="name@example.com" readonly style="opacity:0.75;cursor:not-allowed;">
         </div>
 
         <div class="form-group">
           <label for="pfCollege">College name</label>
-          <input id="pfCollege" required>
+          <input id="pfCollege" type="text" placeholder="e.g. ABC Engineering College" required>
         </div>
 
         <div class="form-group">
           <label for="pfDepartment">Department</label>
-          <input id="pfDepartment" required>
+          <input id="pfDepartment" type="text" placeholder="e.g. Computer Science & Engineering" required>
         </div>
 
         <div class="form-group">
           <label for="pfYear">Graduation year</label>
-          <input id="pfYear" type="number" min="2020" max="2100" required>
+          <input id="pfYear" type="number" min="2020" max="2100" placeholder="e.g. 2027" required>
         </div>
 
         <button type="submit" class="btn btn-primary btn-block" style="margin-top:6px;">Save Profile</button>

@@ -129,14 +129,14 @@ V.student.feed=()=>{
 };
 V.student.graph=()=>{
   const j=job(S.selJob),req=j?j.req:[];
-  const edges=ED.map(([a,b,w])=>{const [x1,y1]=POS[a],[x2,y2]=POS[b];return`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="var(--muted)" stroke-opacity="${.15+w*.5}" stroke-width="${1+w*2}"/>`}).join("");
+  const edges=ED.map(([a,b,w])=>{const [x1,y1]=POS[a],[x2,y2]=POS[b];return`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#586a66" stroke-opacity="${.15+w*.5}" stroke-width="${1+w*2}"/>`}).join("");
   const nodes=SK.map(s=>{const [x,y]=POS[s],mine=S.student.skills.includes(s),r=req.includes(s);
-    return`<g><circle cx="${x}" cy="${y}" r="${mine?11:8}" fill="${mine?"var(--accent)":"var(--surface)"}" stroke="${r?"var(--warn)":"var(--muted)"}" stroke-width="${r?3.5:1.2}"/><text x="${x}" y="${y+(y>350?-16:24)}" text-anchor="middle">${esc(s)}</text></g>`}).join("");
+    return`<g><circle cx="${x}" cy="${y}" r="${mine?11:8}" fill="${mine?"#0b6b63":"#ffffff"}" stroke="${r?"#9a5b06":"#586a66"}" stroke-width="${r?3.5:1.2}"/><text x="${x}" y="${y+(y>350?-16:24)}" text-anchor="middle">${esc(s)}</text></g>`}).join("");
   const m=j?match(j):null;
   return`<div class="head"><div><h2>Skill graph</h2><p>Skills are connected by how closely related they are. Match scores come from the strongest path between your skills and what a role needs.</p></div>
   <label>Highlight role<select id="seljob">${visible().map(x=>`<option value="${x.id}" ${x.id===S.selJob?"selected":""}>${esc(x.t)}</option>`).join("")}</select></label></div>
-  <div class="panel"><div class="tw"><svg viewBox="0 0 740 420" style="min-width:640px;width:100%;height:auto" role="img" aria-label="Skill graph">${edges}${nodes}</svg></div>
-  <div class="row small muted" style="margin-top:8px"><span><svg width="14" height="14"><circle cx="7" cy="7" r="6" fill="var(--accent)"/></svg> your skill</span><span><svg width="14" height="14"><circle cx="7" cy="7" r="5" fill="none" stroke="var(--warn)" stroke-width="3"/></svg> required by role</span><span>Line weight shows relatedness</span></div></div>
+  <div class="panel"><div class="tw"><svg viewBox="0 0 740 420" style="min-width:640px;width:100%;height:auto;background:#ffffff;border-radius:8px" role="img" aria-label="Skill graph">${edges}${nodes}</svg></div>
+  <div class="row small muted" style="margin-top:8px"><span><svg width="14" height="14"><circle cx="7" cy="7" r="6" fill="#0b6b63"/></svg> your skill</span><span><svg width="14" height="14"><circle cx="7" cy="7" r="5" fill="none" stroke="#9a5b06" stroke-width="3"/></svg> required by role</span><span>Line weight shows relatedness</span></div></div>
   ${m?`<div class="panel"><h3>${esc(j.t)}: ${pct(m.graph)}% match</h3><div class="why">${m.rows.map(x=>x.exact?`✓ ${esc(x.r)}: you have it`:x.best>=.4?`≈ ${esc(x.r)}: ${pct(x.best)}% via ${esc(x.from)}`:`✗ ${esc(x.r)}: closest skill is ${pct(x.best)}%. Consider a course.`).join("<br>")}</div></div>`:""}`;
 };
 function kanban(apps,mode){
@@ -193,7 +193,7 @@ V.student.resume=()=>{
   const recs=[...new Set(gaps.flatMap(g=>LEARN.filter(c=>c.skills.includes(g.r))))];
   return`<div class="head"><div><h2>Resume optimiser</h2><p>Paste your resume text and pick a role. It reads the skills in your resume, scores them against the role and suggests courses for the gaps.</p></div></div>
   <div class="grid2"><div class="panel"><label>Target role<select id="rjob">${visible().map(x=>`<option value="${x.id}" ${x.id===S.resumeJob?"selected":""}>${esc(x.t)}, ${esc(x.e)}</option>`).join("")}</select></label>
-  <label style="margin-top:10px">Resume text<textarea id="rtext">${esc(S.resume)}</textarea></label><div class="row" style="margin-top:10px"><button class="btn pri" data-act="analyse">Analyse resume</button></div></div>
+  <label style="margin-top:10px">Resume text<textarea id="rtext" style="min-height:180px">${esc(S.resume)}</textarea></label><div class="row" style="margin-top:10px"><button class="btn pri" data-act="analyse">Analyse resume</button></div></div>
   <div class="panel"><h3>Result</h3>${r?`<div class="row spread"><span class="stat"><b>${r.ats}</b><span class="small muted">ATS score out of 100</span></span><span class="stat"><b>${pct(r.m.graph)}%</b><span class="small muted">skill-graph fit to ${esc(j.t)}</span></span></div>
    <div class="bar" style="margin:10px 0"><i style="width:${r.ats}%"></i></div>
    <div class="small muted">Skills found</div><div class="chips" style="margin:4px 0 10px">${r.found.map(s=>`<span class="chip ok">${esc(s)}</span>`).join("")||"None"}</div>
@@ -217,21 +217,21 @@ function reply(q){
 V.student.chat=()=>`<div class="head"><div><h2>Assistant</h2><p>Answers come from your profile and the live data in this prototype.</p></div></div>
   <div class="panel"><div class="chat">${S.chat.map(m=>`<div class="msg ${m.b?"b":"u"}">${esc(m.t)}</div>`).join("")}</div>
   <div class="chips" style="margin:10px 0">${["Which internship is best for me?","Am I eligible for all roles?","What skills am I missing?","What is my application status?","NOC status"].map(q=>`<button class="btn sm" data-act="ask" data-q="${esc(q)}">${esc(q)}</button>`).join("")}</div>
-  <form class="row" id="chatform" style="flex-wrap:nowrap"><input id="chatq" placeholder="Ask a question" autocomplete="off" aria-label="Ask a question"><button class="btn pri" type="submit">Send</button></form></div>`;
+  <form class="row" id="chatform" style="flex-wrap:nowrap"><input id="chatq" placeholder="Ask a question..." autocomplete="off" aria-label="Ask a question"><button class="btn pri" type="submit">Send</button></form></div>`;
 
 /* ---------- Employer views ---------- */
 const me="Nimbus Labs";
 V.employer.verify=()=>{
   const f=S.vform,r=S.vres2;
   return`<div class="head"><div><h2>Employer verification</h2><p>New employers are checked automatically before any posting reaches students. The sample values below are fictional.</p></div></div>
-  <div class="panel"><form class="form" id="vform"><label>Company name<input id="vn" value="${esc(f.n)}"></label><label>CIN (21 characters)<input id="vc" value="${esc(f.cin)}"></label><label>GSTIN (15 characters)<input id="vg" value="${esc(f.gst)}"></label><label>Company website<input id="vw" value="${esc(f.web)}"></label><label>HR email<input id="ve" value="${esc(f.em)}"></label>
+  <div class="panel"><form class="form" id="vform"><label>Company name<input id="vn" value="${esc(f.n)}" placeholder="e.g. Nimbus Labs Pvt Ltd"></label><label>CIN (21 characters)<input id="vc" value="${esc(f.cin)}" placeholder="e.g. U72900TG2018PTC123456"></label><label>GSTIN (15 characters)<input id="vg" value="${esc(f.gst)}" placeholder="e.g. 36AABCN1234F1Z5"></label><label>Company website<input id="vw" value="${esc(f.web)}" placeholder="e.g. nimbuslabs.in"></label><label>HR email<input id="ve" value="${esc(f.em)}" placeholder="e.g. hr@nimbuslabs.in"></label>
   <label>&nbsp;<span class="row"><button class="btn pri" type="submit">Run verification</button><button class="btn" type="button" data-act="badv">Load invalid sample</button></span></label></form></div>
   ${r?`<div class="panel"><h3>${r.ok?"Verified. You can post roles.":"Verification failed"}</h3><div class="why">${r.c.map(c=>`${c[1]?"✓":"✗"} ${c[0]}`).join("<br>")}</div></div>`:""}`;
 };
 V.employer.post=()=>`<div class="head"><div><h2>Post a role</h2><p>Posting as ${me}. Required skills feed the matching engine, so list what the intern will actually do.</p></div></div>
   <div class="panel"><form id="pform" style="display:flex;flex-direction:column;gap:12px"><div class="form"><label>Role title<input id="pt" value="Site Reliability Intern" required></label><label>Minimum CGPA<input id="pg" type="number" step="0.1" min="0" max="10" value="7"></label>
   <label>Prerequisite course<select id="pp"><option value="">None</option>${COURSES.map(c=>`<option>${c}</option>`).join("")}</select></label><label>Stipend<input id="ps" value="₹20,000/mo"></label></div>
-  <div><div class="small muted" style="margin-bottom:6px">Required skills (pick 2 to 5)</div><div class="chips">${SK.map(s=>`<label style="flex-direction:row;align-items:center;gap:4px;border:1px solid var(--line);padding:3px 9px;border-radius:99px;background:var(--bg)"><input type="checkbox" name="rs" value="${s}" ${["Docker","AWS","Git"].includes(s)?"checked":""} style="width:auto">${esc(s)}</label>`).join("")}</div></div>
+  <div><div class="small muted" style="margin-bottom:6px">Required skills (pick 2 to 5)</div><div class="chips">${SK.map(s=>`<label><input type="checkbox" name="rs" value="${s}" ${["Docker","AWS","Git"].includes(s)?"checked":""}>${esc(s)}</label>`).join("")}</div></div>
   <div><button class="btn pri" type="submit">Publish role</button></div></form></div>`;
 V.employer.pipeline=()=>{
   const apps=S.apps.filter(a=>job(a.job).e===me);
