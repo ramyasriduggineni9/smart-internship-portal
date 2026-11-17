@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
@@ -17,14 +17,7 @@
   --f-body:"IBM Plex Sans",system-ui,sans-serif;
   --f-mono:"IBM Plex Mono",ui-monospace,monospace;
 }
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
-  --bg:#0d1514; --surface:#152120; --ink:#e6efed; --muted:#93a6a1; --line:#263634;
-  --accent:#3cc2b4; --accent-ink:#04201d; --accent-soft:#143a36;
-  --warn:#f0b45a; --warn-soft:#3a2c12; --bad:#ff8a80; --bad-soft:#3d1b18; --good:#6fd392; --good-soft:#163a24; color-scheme:dark}}
-:root[data-theme="dark"]{
-  --bg:#0d1514; --surface:#152120; --ink:#e6efed; --muted:#93a6a1; --line:#263634;
-  --accent:#3cc2b4; --accent-ink:#04201d; --accent-soft:#143a36;
-  --warn:#f0b45a; --warn-soft:#3a2c12; --bad:#ff8a80; --bad-soft:#3d1b18; --good:#6fd392; --good-soft:#163a24; color-scheme:dark}
+/* Dark theme disabled — portal uses light theme consistently */
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:14px;line-height:1.5}
 h1,h2,h3{font-family:var(--f-display);margin:0;text-wrap:balance;line-height:1.2}
