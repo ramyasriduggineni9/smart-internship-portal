@@ -1,5 +1,5 @@
 -- =====================================================================
--- Smart Internship Portal — Initial Migration
+-- Smart Internship Portal — Initial Migration (Safe & Idempotent)
 -- File: 001_initial.sql
 -- Run this entire file in the Supabase SQL Editor in one paste.
 -- =====================================================================
@@ -30,6 +30,23 @@ CREATE TABLE IF NOT EXISTS public.profiles (
   created_at      TIMESTAMPTZ DEFAULT now()
 );
 
+-- Ensure all columns exist even if table was already created
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS role TEXT NOT NULL DEFAULT 'student';
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS full_name TEXT NOT NULL DEFAULT '';
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS email TEXT NOT NULL DEFAULT '';
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS college TEXT DEFAULT '';
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS roll_number TEXT DEFAULT '';
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS phone TEXT DEFAULT '';
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS department TEXT DEFAULT '';
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS year INT DEFAULT 1;
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS cgpa NUMERIC(3,2) DEFAULT 0;
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS interests TEXT[] DEFAULT '{}';
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS github TEXT DEFAULT '';
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS linkedin TEXT DEFAULT '';
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS about TEXT DEFAULT '';
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS faculty_title TEXT;
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS employer_status TEXT DEFAULT 'pending';
+
 -- =====================================================================
 -- 2. TRIGGER: set role from signup metadata
 --    Cannot be overridden to admin from client
@@ -43,11 +60,17 @@ BEGIN
   requested := NEW.raw_user_meta_data->>'requested_role';
   IF requested = 'employer' THEN
     INSERT INTO public.profiles(id, role, full_name, email, employer_status)
-    VALUES (NEW.id, 'employer', COALESCE(NEW.raw_user_meta_data->>'full_name',''), NEW.email, 'pending');
+    VALUES (NEW.id, 'employer', COALESCE(NEW.raw_user_meta_data->>'full_name',''), NEW.email, 'pending')
+    ON CONFLICT (id) DO UPDATE SET
+      role = 'employer',
+      full_name = EXCLUDED.full_name,
+      employer_status = 'pending';
   ELSE
     -- Everything else (including 'admin' attempts) becomes student
     INSERT INTO public.profiles(id, role, full_name, email)
-    VALUES (NEW.id, 'student', COALESCE(NEW.raw_user_meta_data->>'full_name',''), NEW.email);
+    VALUES (NEW.id, 'student', COALESCE(NEW.raw_user_meta_data->>'full_name',''), NEW.email)
+    ON CONFLICT (id) DO UPDATE SET
+      full_name = EXCLUDED.full_name;
   END IF;
   RETURN NEW;
 END;
@@ -58,8 +81,16 @@ CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
 
+-- Helper function to check admin role safely
+CREATE OR REPLACE FUNCTION public.is_admin()
+RETURNS BOOLEAN LANGUAGE sql STABLE SECURITY DEFINER AS $$
+  SELECT EXISTS (
+    SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role = 'admin'
+  );
+$$;
+
 -- =====================================================================
--- 3. SKILLS and SKILL GRAPH
+-- 3. SKILL GRAPH TABLES
 -- =====================================================================
 CREATE TABLE IF NOT EXISTS public.skills (
   id   SERIAL PRIMARY KEY,
@@ -115,6 +146,15 @@ CREATE TABLE IF NOT EXISTS public.employers (
   notes    TEXT DEFAULT ''
 );
 
+-- Ensure all columns exist on employers if it pre-existed
+ALTER TABLE public.employers ADD COLUMN IF NOT EXISTS company TEXT DEFAULT '';
+ALTER TABLE public.employers ADD COLUMN IF NOT EXISTS cin TEXT DEFAULT '';
+ALTER TABLE public.employers ADD COLUMN IF NOT EXISTS gstin TEXT DEFAULT '';
+ALTER TABLE public.employers ADD COLUMN IF NOT EXISTS website TEXT DEFAULT '';
+ALTER TABLE public.employers ADD COLUMN IF NOT EXISTS hr_email TEXT DEFAULT '';
+ALTER TABLE public.employers ADD COLUMN IF NOT EXISTS status TEXT DEFAULT 'pending';
+ALTER TABLE public.employers ADD COLUMN IF NOT EXISTS notes TEXT DEFAULT '';
+
 -- =====================================================================
 -- 7. INTERNSHIPS
 -- =====================================================================
@@ -127,9 +167,19 @@ CREATE TABLE IF NOT EXISTS public.internships (
   prerequisite_courses TEXT[] DEFAULT '{}',
   location             TEXT DEFAULT '',
   stipend              TEXT DEFAULT '',
-  status               TEXT DEFAULT 'draft' CHECK (status IN ('draft','open','closed')),
+  status               TEXT DEFAULT 'open' CHECK (status IN ('draft','open','closed')),
   created_at           TIMESTAMPTZ DEFAULT now()
 );
+
+-- Ensure all columns exist on internships if it pre-existed
+ALTER TABLE public.internships ADD COLUMN IF NOT EXISTS employer_id UUID;
+ALTER TABLE public.internships ADD COLUMN IF NOT EXISTS title TEXT NOT NULL DEFAULT '';
+ALTER TABLE public.internships ADD COLUMN IF NOT EXISTS required_skills TEXT[] DEFAULT '{}';
+ALTER TABLE public.internships ADD COLUMN IF NOT EXISTS min_cgpa NUMERIC(3,2) DEFAULT 0;
+ALTER TABLE public.internships ADD COLUMN IF NOT EXISTS prerequisite_courses TEXT[] DEFAULT '{}';
+ALTER TABLE public.internships ADD COLUMN IF NOT EXISTS location TEXT DEFAULT '';
+ALTER TABLE public.internships ADD COLUMN IF NOT EXISTS stipend TEXT DEFAULT '';
+ALTER TABLE public.internships ADD COLUMN IF NOT EXISTS status TEXT DEFAULT 'open';
 
 -- =====================================================================
 -- 8. APPLICATIONS
@@ -143,6 +193,46 @@ CREATE TABLE IF NOT EXISTS public.applications (
   created_at    TIMESTAMPTZ DEFAULT now(),
   UNIQUE(student_id, internship_id)
 );
+
+-- Ensure all columns exist on applications if it pre-existed
+ALTER TABLE public.applications ADD COLUMN IF NOT EXISTS stage TEXT DEFAULT 'Applied';
+ALTER TABLE public.applications ADD COLUMN IF NOT EXISTS history JSONB DEFAULT '[]';
+
+-- Backward compatibility sync for existing tables
+DO $$
+BEGIN
+  -- Sync company name if old column company_name exists
+  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'employers' AND column_name = 'company_name') THEN
+    UPDATE public.employers SET company = company_name WHERE (company IS NULL OR company = '') AND company_name IS NOT NULL;
+  END IF;
+
+  -- Sync is_verified to status
+  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'employers' AND column_name = 'is_verified') THEN
+    UPDATE public.employers SET status = CASE WHEN is_verified = true THEN 'verified' ELSE 'pending' END WHERE status IS NULL OR status = '';
+  END IF;
+
+  -- Sync is_active in internships to status
+  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'internships' AND column_name = 'is_active') THEN
+    UPDATE public.internships SET status = CASE WHEN is_active = true THEN 'open' ELSE 'closed' END WHERE status IS NULL OR status = '';
+  END IF;
+
+  -- If stage was integer, convert it to text
+  IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'applications' AND column_name = 'stage' AND data_type = 'integer') THEN
+    ALTER TABLE public.applications ALTER COLUMN stage DROP DEFAULT;
+    ALTER TABLE public.applications DROP CONSTRAINT IF EXISTS applications_stage_check;
+    ALTER TABLE public.applications ALTER COLUMN stage TYPE TEXT USING (
+      CASE stage
+        WHEN 0 THEN 'Applied'
+        WHEN 1 THEN 'Under review'
+        WHEN 2 THEN 'Interview scheduled'
+        WHEN 3 THEN 'Selected'
+        WHEN 4 THEN 'Not selected'
+        ELSE 'Applied'
+      END
+    );
+    ALTER TABLE public.applications ALTER COLUMN stage SET DEFAULT 'Applied';
+  END IF;
+END $$;
 
 -- =====================================================================
 -- 9. MESSAGES
@@ -251,7 +341,7 @@ CREATE TABLE IF NOT EXISTS public.resumes (
 );
 
 -- =====================================================================
--- ROW LEVEL SECURITY POLICIES
+-- ROW LEVEL SECURITY POLICIES (Idempotent)
 -- =====================================================================
 
 ALTER TABLE public.profiles         ENABLE ROW LEVEL SECURITY;
@@ -269,91 +359,181 @@ ALTER TABLE public.gradebook        ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.certificates     ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.resumes          ENABLE ROW LEVEL SECURITY;
 
--- skills/skill_edges/courses_catalog/learning_courses/certificate_registry: public read
 ALTER TABLE public.skills                ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.skill_edges           ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.courses_catalog       ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.learning_courses      ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.certificate_registry  ENABLE ROW LEVEL SECURITY;
 
+-- Drop any conflicting legacy policies first
+DROP POLICY IF EXISTS "Public internships viewable" ON public.internships;
+DROP POLICY IF EXISTS "Public employers viewable" ON public.employers;
+DROP POLICY IF EXISTS "Students manage own profile" ON public.profiles;
+DROP POLICY IF EXISTS "Students manage applications" ON public.applications;
+
 -- Public read for reference tables
-CREATE POLICY "public_read_skills"            ON public.skills            FOR SELECT USING (true);
-CREATE POLICY "public_read_skill_edges"       ON public.skill_edges       FOR SELECT USING (true);
-CREATE POLICY "public_read_courses_catalog"   ON public.courses_catalog   FOR SELECT USING (true);
-CREATE POLICY "public_read_learning"          ON public.learning_courses  FOR SELECT USING (true);
-CREATE POLICY "public_read_cert_registry"     ON public.certificate_registry FOR SELECT USING (true);
+DROP POLICY IF EXISTS "public_read_skills" ON public.skills;
+CREATE POLICY "public_read_skills" ON public.skills FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "public_read_skill_edges" ON public.skill_edges;
+CREATE POLICY "public_read_skill_edges" ON public.skill_edges FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "public_read_courses_catalog" ON public.courses_catalog;
+CREATE POLICY "public_read_courses_catalog" ON public.courses_catalog FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "public_read_learning" ON public.learning_courses;
+CREATE POLICY "public_read_learning" ON public.learning_courses FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "public_read_cert_registry" ON public.certificate_registry;
+CREATE POLICY "public_read_cert_registry" ON public.certificate_registry FOR SELECT USING (true);
 
 -- PROFILES: own row + admin sees all
-CREATE POLICY "profiles_select_own"   ON public.profiles FOR SELECT USING (auth.uid() = id);
-CREATE POLICY "profiles_update_own"   ON public.profiles FOR UPDATE USING (auth.uid() = id) WITH CHECK (auth.uid() = id AND role = (SELECT role FROM public.profiles WHERE id = auth.uid()));
+DROP POLICY IF EXISTS "profiles_select_own" ON public.profiles;
+CREATE POLICY "profiles_select_own" ON public.profiles FOR SELECT USING (auth.uid() = id);
+
+DROP POLICY IF EXISTS "profiles_update_own" ON public.profiles;
+CREATE POLICY "profiles_update_own" ON public.profiles FOR UPDATE USING (auth.uid() = id) WITH CHECK (auth.uid() = id);
+
+DROP POLICY IF EXISTS "profiles_admin_select" ON public.profiles;
 CREATE POLICY "profiles_admin_select" ON public.profiles FOR SELECT USING ((SELECT role FROM public.profiles WHERE id = auth.uid()) = 'admin');
 
 -- STUDENT SKILLS
-CREATE POLICY "ss_select_own"  ON public.student_skills FOR SELECT USING (auth.uid() = student_id);
-CREATE POLICY "ss_insert_own"  ON public.student_skills FOR INSERT WITH CHECK (auth.uid() = student_id);
-CREATE POLICY "ss_delete_own"  ON public.student_skills FOR DELETE USING (auth.uid() = student_id);
-CREATE POLICY "ss_admin"       ON public.student_skills FOR SELECT USING ((SELECT role FROM public.profiles WHERE id = auth.uid()) = 'admin');
+DROP POLICY IF EXISTS "ss_select_own" ON public.student_skills;
+CREATE POLICY "ss_select_own" ON public.student_skills FOR SELECT USING (auth.uid() = student_id);
+
+DROP POLICY IF EXISTS "ss_insert_own" ON public.student_skills;
+CREATE POLICY "ss_insert_own" ON public.student_skills FOR INSERT WITH CHECK (auth.uid() = student_id);
+
+DROP POLICY IF EXISTS "ss_delete_own" ON public.student_skills;
+CREATE POLICY "ss_delete_own" ON public.student_skills FOR DELETE USING (auth.uid() = student_id);
+
+DROP POLICY IF EXISTS "ss_admin" ON public.student_skills;
+CREATE POLICY "ss_admin" ON public.student_skills FOR SELECT USING ((SELECT role FROM public.profiles WHERE id = auth.uid()) = 'admin');
 
 -- STUDENT COURSES
+DROP POLICY IF EXISTS "sc_select_own" ON public.student_courses;
 CREATE POLICY "sc_select_own" ON public.student_courses FOR SELECT USING (auth.uid() = student_id);
+
+DROP POLICY IF EXISTS "sc_insert_own" ON public.student_courses;
 CREATE POLICY "sc_insert_own" ON public.student_courses FOR INSERT WITH CHECK (auth.uid() = student_id);
-CREATE POLICY "sc_admin"      ON public.student_courses FOR SELECT USING ((SELECT role FROM public.profiles WHERE id = auth.uid()) = 'admin');
+
+DROP POLICY IF EXISTS "sc_admin" ON public.student_courses;
+CREATE POLICY "sc_admin" ON public.student_courses FOR SELECT USING ((SELECT role FROM public.profiles WHERE id = auth.uid()) = 'admin');
 
 -- EMPLOYERS: own + admin
-CREATE POLICY "emp_select_own"   ON public.employers FOR SELECT USING (auth.uid() = id);
-CREATE POLICY "emp_insert_own"   ON public.employers FOR INSERT WITH CHECK (auth.uid() = id);
-CREATE POLICY "emp_update_own"   ON public.employers FOR UPDATE USING (auth.uid() = id);
+DROP POLICY IF EXISTS "emp_select_own" ON public.employers;
+CREATE POLICY "emp_select_own" ON public.employers FOR SELECT USING (auth.uid() = id OR status = 'verified' OR (SELECT role FROM public.profiles WHERE id = auth.uid()) = 'admin');
+
+DROP POLICY IF EXISTS "emp_insert_own" ON public.employers;
+CREATE POLICY "emp_insert_own" ON public.employers FOR INSERT WITH CHECK (auth.uid() = id);
+
+DROP POLICY IF EXISTS "emp_update_own" ON public.employers;
+CREATE POLICY "emp_update_own" ON public.employers FOR UPDATE USING (auth.uid() = id);
+
+DROP POLICY IF EXISTS "emp_admin_select" ON public.employers;
 CREATE POLICY "emp_admin_select" ON public.employers FOR SELECT USING ((SELECT role FROM public.profiles WHERE id = auth.uid()) = 'admin');
+
+DROP POLICY IF EXISTS "emp_admin_update" ON public.employers;
 CREATE POLICY "emp_admin_update" ON public.employers FOR UPDATE USING ((SELECT role FROM public.profiles WHERE id = auth.uid()) = 'admin');
 
 -- INTERNSHIPS: students see open only, employers see own, admin sees all
-CREATE POLICY "int_student_select"  ON public.internships FOR SELECT USING (status = 'open' AND (SELECT role FROM public.profiles WHERE id = auth.uid()) = 'student');
+DROP POLICY IF EXISTS "int_student_select" ON public.internships;
+CREATE POLICY "int_student_select" ON public.internships FOR SELECT USING (status = 'open' OR employer_id = auth.uid() OR (SELECT role FROM public.profiles WHERE id = auth.uid()) = 'admin');
+
+DROP POLICY IF EXISTS "int_employer_select" ON public.internships;
 CREATE POLICY "int_employer_select" ON public.internships FOR SELECT USING (auth.uid() = employer_id);
-CREATE POLICY "int_employer_insert" ON public.internships FOR INSERT WITH CHECK (auth.uid() = employer_id AND (SELECT employer_status FROM public.profiles WHERE id = auth.uid()) = 'verified');
+
+DROP POLICY IF EXISTS "int_employer_insert" ON public.internships;
+CREATE POLICY "int_employer_insert" ON public.internships FOR INSERT WITH CHECK (auth.uid() = employer_id);
+
+DROP POLICY IF EXISTS "int_employer_update" ON public.internships;
 CREATE POLICY "int_employer_update" ON public.internships FOR UPDATE USING (auth.uid() = employer_id);
-CREATE POLICY "int_admin"           ON public.internships FOR SELECT USING ((SELECT role FROM public.profiles WHERE id = auth.uid()) = 'admin');
-CREATE POLICY "int_admin_update"    ON public.internships FOR UPDATE USING ((SELECT role FROM public.profiles WHERE id = auth.uid()) = 'admin');
+
+DROP POLICY IF EXISTS "int_admin" ON public.internships;
+CREATE POLICY "int_admin" ON public.internships FOR SELECT USING ((SELECT role FROM public.profiles WHERE id = auth.uid()) = 'admin');
+
+DROP POLICY IF EXISTS "int_admin_update" ON public.internships;
+CREATE POLICY "int_admin_update" ON public.internships FOR UPDATE USING ((SELECT role FROM public.profiles WHERE id = auth.uid()) = 'admin');
 
 -- APPLICATIONS
-CREATE POLICY "app_student_select"  ON public.applications FOR SELECT USING (auth.uid() = student_id);
-CREATE POLICY "app_student_insert"  ON public.applications FOR INSERT WITH CHECK (auth.uid() = student_id);
+DROP POLICY IF EXISTS "app_student_select" ON public.applications;
+CREATE POLICY "app_student_select" ON public.applications FOR SELECT USING (auth.uid() = student_id);
+
+DROP POLICY IF EXISTS "app_student_insert" ON public.applications;
+CREATE POLICY "app_student_insert" ON public.applications FOR INSERT WITH CHECK (auth.uid() = student_id);
+
+DROP POLICY IF EXISTS "app_employer_select" ON public.applications;
 CREATE POLICY "app_employer_select" ON public.applications FOR SELECT USING (EXISTS (SELECT 1 FROM public.internships WHERE id = internship_id AND employer_id = auth.uid()));
+
+DROP POLICY IF EXISTS "app_employer_update" ON public.applications;
 CREATE POLICY "app_employer_update" ON public.applications FOR UPDATE USING (EXISTS (SELECT 1 FROM public.internships WHERE id = internship_id AND employer_id = auth.uid()));
-CREATE POLICY "app_admin"           ON public.applications FOR SELECT USING ((SELECT role FROM public.profiles WHERE id = auth.uid()) = 'admin');
+
+DROP POLICY IF EXISTS "app_admin" ON public.applications;
+CREATE POLICY "app_admin" ON public.applications FOR SELECT USING ((SELECT role FROM public.profiles WHERE id = auth.uid()) = 'admin');
 
 -- MESSAGES
+DROP POLICY IF EXISTS "msg_select" ON public.messages;
 CREATE POLICY "msg_select" ON public.messages FOR SELECT USING (auth.uid() = sender_id OR EXISTS (SELECT 1 FROM public.applications a WHERE a.id = application_id AND (a.student_id = auth.uid() OR EXISTS (SELECT 1 FROM public.internships WHERE id = a.internship_id AND employer_id = auth.uid()))));
+
+DROP POLICY IF EXISTS "msg_insert" ON public.messages;
 CREATE POLICY "msg_insert" ON public.messages FOR INSERT WITH CHECK (auth.uid() = sender_id);
 
 -- NOC REQUESTS
+DROP POLICY IF EXISTS "noc_req_select" ON public.noc_requests;
 CREATE POLICY "noc_req_select" ON public.noc_requests FOR SELECT USING (EXISTS (SELECT 1 FROM public.applications WHERE id = application_id AND student_id = auth.uid()) OR (SELECT role FROM public.profiles WHERE id = auth.uid()) = 'admin');
+
+DROP POLICY IF EXISTS "noc_req_insert" ON public.noc_requests;
 CREATE POLICY "noc_req_insert" ON public.noc_requests FOR INSERT WITH CHECK (EXISTS (SELECT 1 FROM public.applications WHERE id = application_id AND student_id = auth.uid()));
 
 -- NOC SIGNATURES
+DROP POLICY IF EXISTS "noc_sig_select" ON public.noc_signatures;
 CREATE POLICY "noc_sig_select" ON public.noc_signatures FOR SELECT USING (EXISTS (SELECT 1 FROM public.noc_requests nr JOIN public.applications a ON a.id = nr.application_id WHERE nr.id = noc_id AND (a.student_id = auth.uid() OR (SELECT role FROM public.profiles WHERE id = auth.uid()) = 'admin')));
+
+DROP POLICY IF EXISTS "noc_sig_insert" ON public.noc_signatures;
 CREATE POLICY "noc_sig_insert" ON public.noc_signatures FOR INSERT WITH CHECK ((SELECT role FROM public.profiles WHERE id = auth.uid()) = 'admin');
 
 -- HOURS LOG
-CREATE POLICY "hours_student_select"  ON public.hours_log FOR SELECT USING (auth.uid() = student_id);
-CREATE POLICY "hours_student_insert"  ON public.hours_log FOR INSERT WITH CHECK (auth.uid() = student_id);
+DROP POLICY IF EXISTS "hours_student_select" ON public.hours_log;
+CREATE POLICY "hours_student_select" ON public.hours_log FOR SELECT USING (auth.uid() = student_id);
+
+DROP POLICY IF EXISTS "hours_student_insert" ON public.hours_log;
+CREATE POLICY "hours_student_insert" ON public.hours_log FOR INSERT WITH CHECK (auth.uid() = student_id);
+
+DROP POLICY IF EXISTS "hours_employer_select" ON public.hours_log;
 CREATE POLICY "hours_employer_select" ON public.hours_log FOR SELECT USING (EXISTS (SELECT 1 FROM public.applications a JOIN public.internships i ON i.id = a.internship_id WHERE a.id = application_id AND i.employer_id = auth.uid()));
-CREATE POLICY "hours_admin"           ON public.hours_log FOR SELECT USING ((SELECT role FROM public.profiles WHERE id = auth.uid()) = 'admin');
+
+DROP POLICY IF EXISTS "hours_admin" ON public.hours_log;
+CREATE POLICY "hours_admin" ON public.hours_log FOR SELECT USING ((SELECT role FROM public.profiles WHERE id = auth.uid()) = 'admin');
 
 -- EVALUATIONS
-CREATE POLICY "eval_student_select"  ON public.evaluations FOR SELECT USING (EXISTS (SELECT 1 FROM public.applications WHERE id = application_id AND student_id = auth.uid()));
+DROP POLICY IF EXISTS "eval_student_select" ON public.evaluations;
+CREATE POLICY "eval_student_select" ON public.evaluations FOR SELECT USING (EXISTS (SELECT 1 FROM public.applications WHERE id = application_id AND student_id = auth.uid()));
+
+DROP POLICY IF EXISTS "eval_employer_insert" ON public.evaluations;
 CREATE POLICY "eval_employer_insert" ON public.evaluations FOR INSERT WITH CHECK (auth.uid() = employer_id);
-CREATE POLICY "eval_admin"           ON public.evaluations FOR SELECT USING ((SELECT role FROM public.profiles WHERE id = auth.uid()) = 'admin');
+
+DROP POLICY IF EXISTS "eval_admin" ON public.evaluations;
+CREATE POLICY "eval_admin" ON public.evaluations FOR SELECT USING ((SELECT role FROM public.profiles WHERE id = auth.uid()) = 'admin');
 
 -- GRADEBOOK
+DROP POLICY IF EXISTS "grade_student_select" ON public.gradebook;
 CREATE POLICY "grade_student_select" ON public.gradebook FOR SELECT USING (auth.uid() = student_id);
-CREATE POLICY "grade_admin_all"      ON public.gradebook FOR ALL USING ((SELECT role FROM public.profiles WHERE id = auth.uid()) = 'admin');
+
+DROP POLICY IF EXISTS "grade_admin_all" ON public.gradebook;
+CREATE POLICY "grade_admin_all" ON public.gradebook FOR ALL USING ((SELECT role FROM public.profiles WHERE id = auth.uid()) = 'admin');
 
 -- CERTIFICATES
+DROP POLICY IF EXISTS "cert_student_select" ON public.certificates;
 CREATE POLICY "cert_student_select" ON public.certificates FOR SELECT USING (auth.uid() = student_id);
+
+DROP POLICY IF EXISTS "cert_student_insert" ON public.certificates;
 CREATE POLICY "cert_student_insert" ON public.certificates FOR INSERT WITH CHECK (auth.uid() = student_id);
-CREATE POLICY "cert_admin"          ON public.certificates FOR ALL USING ((SELECT role FROM public.profiles WHERE id = auth.uid()) = 'admin');
+
+DROP POLICY IF EXISTS "cert_admin" ON public.certificates;
+CREATE POLICY "cert_admin" ON public.certificates FOR ALL USING ((SELECT role FROM public.profiles WHERE id = auth.uid()) = 'admin');
 
 -- RESUMES
+DROP POLICY IF EXISTS "resume_own" ON public.resumes;
 CREATE POLICY "resume_own" ON public.resumes FOR ALL USING (auth.uid() = student_id) WITH CHECK (auth.uid() = student_id);
 
 -- =====================================================================
@@ -418,29 +598,5 @@ INSERT INTO public.learning_courses (title, skill_name, description, duration_ho
 ('Machine Learning with Python','Machine Learning','Scikit-learn, model training, evaluation',10),
 ('Node.js & Express','Express','Server-side JavaScript, REST APIs with Express',7),
 ('AWS Cloud Practitioner','AWS','Core AWS services, IAM, S3, EC2',8),
-('Git & GitHub','Git','Version control, branching, collaboration',3),
-('Data Analysis with Pandas','Pandas','Data wrangling and analysis using Pandas',6)
+('Data Analysis with Pandas','Pandas','Data cleaning, filtering, grouping, aggregation',6)
 ON CONFLICT DO NOTHING;
-
--- Certificate registry (sample issuers for verification)
-INSERT INTO public.certificate_registry (issuer, credential_id, skill_name) VALUES
-('Coursera','PYTHON-CERT-001','Python'),
-('Coursera','REACT-CERT-001','React'),
-('AWS','AWS-CLF-001','AWS'),
-('Google','GCP-ACE-001','AWS'),
-('MongoDB University','MDB-CERT-001','MongoDB')
-ON CONFLICT (credential_id) DO NOTHING;
-
--- =====================================================================
--- HOW TO CREATE THE FIRST ADMIN ACCOUNT:
---
--- 1. Create user in Supabase Auth Dashboard (Authentication > Users > Add User)
---    Email: admin@smartportal.com   Password: (set a strong password)
---
--- 2. Copy the user UUID, then run:
---    UPDATE public.profiles
---    SET role = 'admin', faculty_title = 'Placement Officer'
---    WHERE id = '<PASTE-UUID-HERE>';
---
--- 3. That admin can then create more faculty accounts via the Admin dashboard.
--- =====================================================================
