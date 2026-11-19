@@ -97,13 +97,20 @@ CREATE TABLE IF NOT EXISTS public.skills (
   name TEXT UNIQUE NOT NULL
 );
 
+-- Ensure all columns exist on skills if it pre-existed
+ALTER TABLE public.skills ADD COLUMN IF NOT EXISTS name TEXT;
+
 CREATE TABLE IF NOT EXISTS public.skill_edges (
   id     SERIAL PRIMARY KEY,
   a      TEXT NOT NULL,
   b      TEXT NOT NULL,
-  weight NUMERIC(4,3) NOT NULL,
-  UNIQUE(a,b)
+  weight NUMERIC(4,3) NOT NULL
 );
+
+-- Ensure all columns exist on skill_edges if it pre-existed
+ALTER TABLE public.skill_edges ADD COLUMN IF NOT EXISTS a TEXT;
+ALTER TABLE public.skill_edges ADD COLUMN IF NOT EXISTS b TEXT;
+ALTER TABLE public.skill_edges ADD COLUMN IF NOT EXISTS weight NUMERIC(4,3);
 
 -- =====================================================================
 -- 4. STUDENT SKILLS (which skills a student has)
@@ -115,6 +122,10 @@ CREATE TABLE IF NOT EXISTS public.student_skills (
   PRIMARY KEY (student_id, skill_name)
 );
 
+ALTER TABLE public.student_skills ADD COLUMN IF NOT EXISTS student_id UUID;
+ALTER TABLE public.student_skills ADD COLUMN IF NOT EXISTS skill_name TEXT;
+ALTER TABLE public.student_skills ADD COLUMN IF NOT EXISTS source TEXT DEFAULT 'manual';
+
 -- =====================================================================
 -- 5. COURSES
 -- =====================================================================
@@ -125,12 +136,20 @@ CREATE TABLE IF NOT EXISTS public.courses_catalog (
   description TEXT DEFAULT ''
 );
 
+ALTER TABLE public.courses_catalog ADD COLUMN IF NOT EXISTS name TEXT;
+ALTER TABLE public.courses_catalog ADD COLUMN IF NOT EXISTS department TEXT DEFAULT '';
+ALTER TABLE public.courses_catalog ADD COLUMN IF NOT EXISTS description TEXT DEFAULT '';
+
 CREATE TABLE IF NOT EXISTS public.student_courses (
   student_id    UUID REFERENCES public.profiles(id) ON DELETE CASCADE,
   course_name   TEXT NOT NULL,
   completed_at  DATE DEFAULT CURRENT_DATE,
   PRIMARY KEY (student_id, course_name)
 );
+
+ALTER TABLE public.student_courses ADD COLUMN IF NOT EXISTS student_id UUID;
+ALTER TABLE public.student_courses ADD COLUMN IF NOT EXISTS course_name TEXT;
+ALTER TABLE public.student_courses ADD COLUMN IF NOT EXISTS completed_at DATE DEFAULT CURRENT_DATE;
 
 -- =====================================================================
 -- 6. EMPLOYERS
@@ -328,6 +347,11 @@ CREATE TABLE IF NOT EXISTS public.learning_courses (
   description    TEXT DEFAULT '',
   duration_hours INT DEFAULT 4
 );
+
+ALTER TABLE public.learning_courses ADD COLUMN IF NOT EXISTS title TEXT;
+ALTER TABLE public.learning_courses ADD COLUMN IF NOT EXISTS skill_name TEXT;
+ALTER TABLE public.learning_courses ADD COLUMN IF NOT EXISTS description TEXT DEFAULT '';
+ALTER TABLE public.learning_courses ADD COLUMN IF NOT EXISTS duration_hours INT DEFAULT 4;
 
 -- =====================================================================
 -- 15. RESUMES
@@ -529,74 +553,91 @@ CREATE POLICY "cert_student_select" ON public.certificates FOR SELECT USING (aut
 DROP POLICY IF EXISTS "cert_student_insert" ON public.certificates;
 CREATE POLICY "cert_student_insert" ON public.certificates FOR INSERT WITH CHECK (auth.uid() = student_id);
 
-DROP POLICY IF EXISTS "cert_admin" ON public.certificates;
-CREATE POLICY "cert_admin" ON public.certificates FOR ALL USING ((SELECT role FROM public.profiles WHERE id = auth.uid()) = 'admin');
-
 -- RESUMES
 DROP POLICY IF EXISTS "resume_own" ON public.resumes;
 CREATE POLICY "resume_own" ON public.resumes FOR ALL USING (auth.uid() = student_id) WITH CHECK (auth.uid() = student_id);
 
 -- =====================================================================
--- SEED DATA
+-- SEED DATA (Safe INSERT ... SELECT ... WHERE NOT EXISTS)
 -- =====================================================================
 
 -- Skills (22 nodes)
-INSERT INTO public.skills (name) VALUES
-('Python'),('Django'),('Flask'),('Pandas'),('Data Analysis'),('Statistics'),
-('Machine Learning'),('TensorFlow'),('REST APIs'),('Express'),('Node.js'),
-('JavaScript'),('React'),('HTML/CSS'),('SQL'),('PostgreSQL'),('MongoDB'),
-('Java'),('Spring Boot'),('Docker'),('AWS'),('Git')
-ON CONFLICT (name) DO NOTHING;
+INSERT INTO public.skills (name)
+SELECT s.name
+FROM (VALUES
+  ('Python'),('Django'),('Flask'),('Pandas'),('Data Analysis'),('Statistics'),
+  ('Machine Learning'),('TensorFlow'),('REST APIs'),('Express'),('Node.js'),
+  ('JavaScript'),('React'),('HTML/CSS'),('SQL'),('PostgreSQL'),('MongoDB'),
+  ('Java'),('Spring Boot'),('Docker'),('AWS'),('Git')
+) AS s(name)
+WHERE NOT EXISTS (
+  SELECT 1 FROM public.skills WHERE public.skills.name = s.name
+);
 
 -- Skill edges (weighted graph)
-INSERT INTO public.skill_edges (a, b, weight) VALUES
-('Python','Django',0.800),
-('Python','Flask',0.800),
-('Python','Pandas',0.750),
-('Flask','REST APIs',0.700),
-('Pandas','Data Analysis',0.800),
-('Data Analysis','Statistics',0.700),
-('Machine Learning','TensorFlow',0.750),
-('Machine Learning','Statistics',0.650),
-('Machine Learning','Python',0.600),
-('SQL','PostgreSQL',0.850),
-('JavaScript','React',0.800),
-('HTML/CSS','React',0.600),
-('Node.js','Express',0.850),
-('Node.js','JavaScript',0.750),
-('Node.js','REST APIs',0.650),
-('Java','Spring Boot',0.800),
-('Docker','AWS',0.600),
-('Git','Python',0.300),
-('Git','JavaScript',0.300),
-('Git','Java',0.300),
-('Git','SQL',0.300),
-('Git','Docker',0.300)
-ON CONFLICT (a, b) DO NOTHING;
+INSERT INTO public.skill_edges (a, b, weight)
+SELECT e.a, e.b, e.weight
+FROM (VALUES
+  ('Python','Django',0.800),
+  ('Python','Flask',0.800),
+  ('Python','Pandas',0.750),
+  ('Flask','REST APIs',0.700),
+  ('Pandas','Data Analysis',0.800),
+  ('Data Analysis','Statistics',0.700),
+  ('Machine Learning','TensorFlow',0.750),
+  ('Machine Learning','Statistics',0.650),
+  ('Machine Learning','Python',0.600),
+  ('SQL','PostgreSQL',0.850),
+  ('JavaScript','React',0.800),
+  ('HTML/CSS','React',0.600),
+  ('Node.js','Express',0.850),
+  ('Node.js','JavaScript',0.750),
+  ('Node.js','REST APIs',0.650),
+  ('Java','Spring Boot',0.800),
+  ('Docker','AWS',0.600),
+  ('Git','Python',0.300),
+  ('Git','JavaScript',0.300),
+  ('Git','Java',0.300),
+  ('Git','SQL',0.300),
+  ('Git','Docker',0.300)
+) AS e(a, b, weight)
+WHERE NOT EXISTS (
+  SELECT 1 FROM public.skill_edges WHERE public.skill_edges.a = e.a AND public.skill_edges.b = e.b
+);
 
 -- Courses catalog
-INSERT INTO public.courses_catalog (name, department, description) VALUES
-('Data Structures','CSE','Arrays, linked lists, trees, graphs'),
-('Operating Systems','CSE','Process management, memory, file systems'),
-('DBMS','CSE','Relational model, SQL, normalization'),
-('Computer Networks','CSE','TCP/IP, routing, security'),
-('Web Technologies','CSE','HTML, CSS, JavaScript, REST'),
-('Python Programming','CSE','Core Python, OOP, libraries'),
-('Machine Learning','CSE','Supervised, unsupervised, neural networks'),
-('Software Engineering','CSE','SDLC, agile, testing'),
-('Cloud Computing','CSE','AWS, Azure, GCP basics'),
-('Data Analytics','CSE','Statistics, Pandas, visualization')
-ON CONFLICT (name) DO NOTHING;
+INSERT INTO public.courses_catalog (name, department, description)
+SELECT c.name, c.department, c.description
+FROM (VALUES
+  ('Data Structures','CSE','Arrays, linked lists, trees, graphs'),
+  ('Operating Systems','CSE','Process management, memory, file systems'),
+  ('DBMS','CSE','Relational model, SQL, normalization'),
+  ('Computer Networks','CSE','TCP/IP, routing, security'),
+  ('Web Technologies','CSE','HTML, CSS, JavaScript, REST'),
+  ('Python Programming','CSE','Core Python, OOP, libraries'),
+  ('Machine Learning','CSE','Supervised, unsupervised, neural networks'),
+  ('Software Engineering','CSE','SDLC, agile, testing'),
+  ('Cloud Computing','CSE','AWS, Azure, GCP basics'),
+  ('Data Analytics','CSE','Statistics, Pandas, visualization')
+) AS c(name, department, description)
+WHERE NOT EXISTS (
+  SELECT 1 FROM public.courses_catalog WHERE public.courses_catalog.name = c.name
+);
 
 -- Learning courses
-INSERT INTO public.learning_courses (title, skill_name, description, duration_hours) VALUES
-('Python for Beginners','Python','Learn Python from scratch with hands-on exercises',6),
-('Django Web Framework','Django','Build web apps with Django REST Framework',8),
-('React Fundamentals','React','Component-based UI development with React 18',8),
-('SQL & PostgreSQL','PostgreSQL','Relational databases and advanced queries',6),
-('Docker Essentials','Docker','Containerisation and Docker Compose',5),
-('Machine Learning with Python','Machine Learning','Scikit-learn, model training, evaluation',10),
-('Node.js & Express','Express','Server-side JavaScript, REST APIs with Express',7),
-('AWS Cloud Practitioner','AWS','Core AWS services, IAM, S3, EC2',8),
-('Data Analysis with Pandas','Pandas','Data cleaning, filtering, grouping, aggregation',6)
-ON CONFLICT DO NOTHING;
+INSERT INTO public.learning_courses (title, skill_name, description, duration_hours)
+SELECT l.title, l.skill_name, l.description, l.duration_hours
+FROM (VALUES
+  ('Python for Beginners','Python','Learn Python from scratch with hands-on exercises',6),
+  ('Django Web Framework','Django','Build web apps with Django REST Framework',8),
+  ('React Fundamentals','React','Component-based UI development with React 18',8),
+  ('SQL & PostgreSQL','PostgreSQL','Relational databases and advanced queries',6),
+  ('Docker Essentials','Docker','Containerisation and Docker Compose',5),
+  ('Machine Learning with Python','Machine Learning','Scikit-learn, model training, evaluation',10),
+  ('Node.js & Express','Express','Server-side JavaScript, REST APIs with Express',7),
+  ('AWS Cloud Practitioner','AWS','Core AWS services, IAM, S3, EC2',8),
+  ('Data Analysis with Pandas','Pandas','Data cleaning, filtering, grouping, aggregation',6)
+) AS l(title, skill_name, description, duration_hours)
+WHERE NOT EXISTS (
+  SELECT 1 FROM public.learning_courses WHERE public.learning_courses.title = l.title
+);
