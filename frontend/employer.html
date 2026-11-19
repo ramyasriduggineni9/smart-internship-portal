@@ -1,0 +1,276 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Employer Dashboard — Smart Internship Portal</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/dashboard.css">
+</head>
+<body>
+
+  <div id="authLoader" class="auth-loader">
+    <div class="loader-spin"></div>
+    <p>Verifying your session…</p>
+  </div>
+
+  <div id="dashboardApp" hidden>
+    <header class="dash-header" style="--role-color:#1a56db;">
+      <div class="dash-header-inner">
+        <div class="dash-brand">
+          <span class="dash-brand-icon">🏢</span>
+          <div>
+            <span class="dash-brand-title">Smart Internship Portal</span>
+            <span class="dash-brand-role">Employer Dashboard</span>
+          </div>
+        </div>
+        <div class="dash-header-right">
+          <span class="dash-user-name" id="dashUserName">—</span>
+          <button class="dash-btn-secondary" id="profileOpenBtn">Company Profile</button>
+          <button class="dash-btn-danger" id="signOutBtn">Sign Out</button>
+        </div>
+      </div>
+    </header>
+
+    <div class="dash-layout">
+      <!-- Sidebar Nav -->
+      <nav class="dash-sidebar" style="--role-color:#1a56db;">
+        <a class="dash-nav-link active" data-tab="overview">📊 Overview</a>
+        <a class="dash-nav-link" data-tab="post">➕ Post Internship</a>
+        <a class="dash-nav-link" data-tab="listings">📋 My Listings</a>
+        <a class="dash-nav-link" data-tab="applicants">👥 Applicants</a>
+      </nav>
+
+      <!-- Main Content -->
+      <main class="dash-main" id="empMain">
+
+        <!-- Overview Tab -->
+        <section id="tab-overview" class="dash-tab active">
+          <h2 class="dash-page-title">Welcome Back, <span id="empCompanyName">Company</span>!</h2>
+          <div class="stat-cards">
+            <div class="stat-card"><span class="stat-num" id="statListings">—</span><span class="stat-lbl">Active Listings</span></div>
+            <div class="stat-card"><span class="stat-num" id="statApplicants">—</span><span class="stat-lbl">Total Applicants</span></div>
+            <div class="stat-card"><span class="stat-num" id="statSelected">—</span><span class="stat-lbl">Selected</span></div>
+          </div>
+          <div class="dash-card">
+            <h3>Company Profile Status</h3>
+            <p id="verifyStatus" class="status-note"></p>
+          </div>
+        </section>
+
+        <!-- Post Internship Tab -->
+        <section id="tab-post" class="dash-tab" hidden>
+          <h2 class="dash-page-title">Post a New Internship</h2>
+          <div class="dash-card">
+            <form id="postForm">
+              <div class="form-group"><label>Role Title *</label><input id="pTitle" placeholder="e.g. Backend Developer Intern" required></div>
+              <div class="form-group"><label>Department / Domain *</label><input id="pDomain" placeholder="e.g. Computer Science, Data Analytics" required></div>
+              <div class="form-group"><label>Duration *</label><input id="pDuration" placeholder="e.g. 2 months (June – July 2027)" required></div>
+              <div class="form-group"><label>Stipend</label><input id="pStipend" placeholder="e.g. ₹8,000/month or Unpaid"></div>
+              <div class="form-group"><label>Minimum CGPA</label><input id="pCgpa" type="number" step="0.1" min="0" max="10" placeholder="e.g. 7.5"></div>
+              <div class="form-group"><label>Required Skills (comma-separated)</label><input id="pSkills" placeholder="e.g. Python, Django, SQL"></div>
+              <div class="form-group"><label>Description</label><textarea id="pDesc" rows="4" placeholder="Describe the internship role and responsibilities…"></textarea></div>
+              <div class="form-group"><label>Application Deadline</label><input id="pDeadline" type="date"></div>
+              <button type="submit" class="btn btn-primary">Post Internship</button>
+              <div class="modal-msg" id="postMsg"></div>
+            </form>
+          </div>
+        </section>
+
+        <!-- My Listings Tab -->
+        <section id="tab-listings" class="dash-tab" hidden>
+          <h2 class="dash-page-title">My Internship Listings</h2>
+          <div id="listingsContainer"><p class="muted-note">Loading listings…</p></div>
+        </section>
+
+        <!-- Applicants Tab -->
+        <section id="tab-applicants" class="dash-tab" hidden>
+          <h2 class="dash-page-title">Applicants</h2>
+          <div id="applicantsContainer"><p class="muted-note">Loading applicants…</p></div>
+        </section>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- Company Profile Modal -->
+  <div id="profilePanel" class="modal-backdrop" hidden>
+    <div class="modal-card modal-card-lg" role="dialog">
+      <div class="modal-header">
+        <h3>Company Profile</h3>
+        <button class="modal-close" id="profileClose">×</button>
+      </div>
+      <form id="profileForm">
+        <div class="form-group"><label>Company Name *</label><input id="pfCompany" required></div>
+        <div class="form-group"><label>Company Email *</label><input id="pfCompanyEmail" type="email" required></div>
+        <div class="form-group"><label>Contact Phone</label><input id="pfPhone" type="tel"></div>
+        <div class="form-group"><label>Website</label><input id="pfWebsite" type="url" placeholder="https://"></div>
+        <div class="form-group"><label>Industry</label><input id="pfIndustry" placeholder="e.g. IT Services, FinTech"></div>
+        <div class="form-group"><label>Company Description</label><textarea id="pfDesc" rows="3"></textarea></div>
+        <button type="submit" class="btn btn-primary btn-block">Save Profile</button>
+        <div class="modal-msg" id="profileMessage"></div>
+      </form>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" hidden></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/auth.js"></script>
+  <script>
+  (async () => {
+    const loader = document.getElementById('authLoader');
+    const app    = document.getElementById('dashboardApp');
+
+    const ctx = await window.SIP.requireRole('employer');
+    if (!ctx) return;
+
+    const { user } = ctx;
+    const client   = window.SIP.getSupabaseClient();
+
+    loader.hidden = true;
+    app.hidden    = false;
+
+    document.getElementById('dashUserName').textContent = user.user_metadata?.full_name || user.email;
+
+    // --- Load employer profile ---
+    async function loadProfile() {
+      const { data } = await client.from('employer_profiles').select('*').eq('user_id', user.id).maybeSingle();
+      if (data) {
+        document.getElementById('pfCompany').value      = data.company_name || '';
+        document.getElementById('pfCompanyEmail').value = data.company_email || '';
+        document.getElementById('pfPhone').value        = data.contact_phone || '';
+        document.getElementById('pfWebsite').value      = data.website || '';
+        document.getElementById('pfIndustry').value     = data.industry || '';
+        document.getElementById('pfDesc').value         = data.description || '';
+        document.getElementById('empCompanyName').textContent = data.company_name || 'Company';
+        document.getElementById('verifyStatus').textContent   = data.verified
+          ? '✅ Verified employer — your listings are visible to students.'
+          : '⏳ Pending verification — listings visible after admin review.';
+      }
+    }
+    await loadProfile();
+
+    // --- Load stats ---
+    async function loadStats() {
+      const { data: listings } = await client.from('internships').select('id').eq('employer_id', user.id);
+      document.getElementById('statListings').textContent = listings?.length ?? 0;
+      if (listings?.length) {
+        const ids = listings.map(l => l.id);
+        const { data: apps } = await client.from('applications').select('id, status').in('internship_id', ids);
+        document.getElementById('statApplicants').textContent = apps?.length ?? 0;
+        document.getElementById('statSelected').textContent   = apps?.filter(a => a.status === 'selected').length ?? 0;
+      }
+    }
+    loadStats();
+
+    // --- Load listings ---
+    async function loadListings() {
+      const { data } = await client.from('internships').select('*').eq('employer_id', user.id).order('created_at', { ascending: false });
+      const c = document.getElementById('listingsContainer');
+      if (!data?.length) { c.innerHTML = '<p class="muted-note">No listings yet. Post your first internship!</p>'; return; }
+      c.innerHTML = data.map(r => `
+        <div class="list-row">
+          <div><b>${r.title}</b> <span class="chip">${r.domain || ''}</span></div>
+          <div class="muted-note">Duration: ${r.duration || '—'} · Stipend: ${r.stipend || '—'}</div>
+          <div class="muted-note">Deadline: ${r.deadline || '—'}</div>
+        </div>`).join('');
+    }
+
+    // --- Load applicants ---
+    async function loadApplicants() {
+      const { data: listings } = await client.from('internships').select('id, title').eq('employer_id', user.id);
+      if (!listings?.length) { document.getElementById('applicantsContainer').innerHTML = '<p class="muted-note">No listings yet.</p>'; return; }
+      const ids = listings.map(l => l.id);
+      const { data: apps } = await client.from('applications').select('*, students(full_name, email, cgpa, department)').in('internship_id', ids);
+      const c = document.getElementById('applicantsContainer');
+      if (!apps?.length) { c.innerHTML = '<p class="muted-note">No applicants yet.</p>'; return; }
+      const listMap = Object.fromEntries(listings.map(l => [l.id, l.title]));
+      c.innerHTML = apps.map(a => `
+        <div class="list-row">
+          <div><b>${a.students?.full_name || 'Student'}</b> — ${listMap[a.internship_id] || 'Role'}</div>
+          <div class="muted-note">Email: ${a.students?.email || '—'} · CGPA: ${a.students?.cgpa || '—'} · Dept: ${a.students?.department || '—'}</div>
+          <div>
+            <select data-app="${a.id}" class="status-select">
+              <option value="applied"      ${a.status==='applied'      ?'selected':''}>Applied</option>
+              <option value="under_review" ${a.status==='under_review' ?'selected':''}>Under Review</option>
+              <option value="interview"    ${a.status==='interview'    ?'selected':''}>Interview</option>
+              <option value="selected"     ${a.status==='selected'     ?'selected':''}>Selected</option>
+              <option value="rejected"     ${a.status==='rejected'     ?'selected':''}>Rejected</option>
+            </select>
+          </div>
+        </div>`).join('');
+
+      document.querySelectorAll('.status-select').forEach(sel => {
+        sel.onchange = async () => {
+          await client.from('applications').update({ status: sel.value }).eq('id', sel.dataset.app);
+          loadStats();
+        };
+      });
+    }
+
+    // --- Tab navigation ---
+    document.querySelectorAll('.dash-nav-link').forEach(link => {
+      link.onclick = () => {
+        document.querySelectorAll('.dash-nav-link').forEach(l => l.classList.remove('active'));
+        document.querySelectorAll('.dash-tab').forEach(t => t.hidden = true);
+        link.classList.add('active');
+        const tab = document.getElementById('tab-' + link.dataset.tab);
+        if (tab) {
+          tab.hidden = false;
+          if (link.dataset.tab === 'listings')   loadListings();
+          if (link.dataset.tab === 'applicants') loadApplicants();
+        }
+      };
+    });
+
+    // --- Post internship ---
+    document.getElementById('postForm').onsubmit = async (e) => {
+      e.preventDefault();
+      const msg = document.getElementById('postMsg');
+      msg.textContent = '';
+      const { error } = await client.from('internships').insert({
+        employer_id: user.id,
+        title:    document.getElementById('pTitle').value.trim(),
+        domain:   document.getElementById('pDomain').value.trim(),
+        duration: document.getElementById('pDuration').value.trim(),
+        stipend:  document.getElementById('pStipend').value.trim(),
+        min_cgpa: Number(document.getElementById('pCgpa').value) || null,
+        skills:   document.getElementById('pSkills').value.split(',').map(s => s.trim()).filter(Boolean),
+        description: document.getElementById('pDesc').value.trim(),
+        deadline: document.getElementById('pDeadline').value || null
+      });
+      if (error) { msg.className = 'modal-msg auth-error'; msg.textContent = error.message; }
+      else {
+        msg.className = 'modal-msg auth-success'; msg.textContent = 'Internship posted successfully!';
+        document.getElementById('postForm').reset();
+        loadStats();
+      }
+    };
+
+    // --- Profile modal ---
+    document.getElementById('profileOpenBtn').onclick = () => { document.getElementById('profilePanel').hidden = false; };
+    document.getElementById('profileClose').onclick   = () => { document.getElementById('profilePanel').hidden = true;  };
+
+    document.getElementById('profileForm').onsubmit = async (e) => {
+      e.preventDefault();
+      const msg = document.getElementById('profileMessage');
+      const { error } = await client.from('employer_profiles').upsert({
+        user_id:      user.id,
+        company_name:  document.getElementById('pfCompany').value.trim(),
+        company_email: document.getElementById('pfCompanyEmail').value.trim(),
+        contact_phone: document.getElementById('pfPhone').value.trim(),
+        website:       document.getElementById('pfWebsite').value.trim(),
+        industry:      document.getElementById('pfIndustry').value.trim(),
+        description:   document.getElementById('pfDesc').value.trim()
+      }, { onConflict: 'user_id' });
+      if (error) { msg.className = 'modal-msg auth-error'; msg.textContent = error.message; }
+      else { msg.className = 'modal-msg auth-success'; msg.textContent = 'Profile saved!'; loadProfile(); }
+    };
+
+    document.getElementById('signOutBtn').onclick = () => window.SIP.signOutAndRedirect();
+  })();
+  </script>
+</body>
+</html>

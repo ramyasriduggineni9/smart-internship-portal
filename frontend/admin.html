@@ -1,0 +1,315 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Admin Dashboard — Smart Internship Portal</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/dashboard.css">
+</head>
+<body>
+
+  <div id="authLoader" class="auth-loader">
+    <div class="loader-spin"></div>
+    <p>Verifying your session…</p>
+  </div>
+
+  <div id="dashboardApp" hidden>
+    <header class="dash-header" style="--role-color:#c0392b;">
+      <div class="dash-header-inner">
+        <div class="dash-brand">
+          <span class="dash-brand-icon">🛡️</span>
+          <div>
+            <span class="dash-brand-title">Smart Internship Portal</span>
+            <span class="dash-brand-role">Admin Dashboard</span>
+          </div>
+        </div>
+        <div class="dash-header-right">
+          <span class="dash-user-name" id="dashUserName">—</span>
+          <button class="dash-btn-danger" id="signOutBtn">Sign Out</button>
+        </div>
+      </div>
+    </header>
+
+    <div class="dash-layout">
+      <nav class="dash-sidebar" style="--role-color:#c0392b;">
+        <a class="dash-nav-link active" data-tab="overview">📊 Overview</a>
+        <a class="dash-nav-link" data-tab="users">👥 All Users</a>
+        <a class="dash-nav-link" data-tab="students">🎓 Students</a>
+        <a class="dash-nav-link" data-tab="employers">🏢 Employers</a>
+        <a class="dash-nav-link" data-tab="faculty">🧑‍🏫 Faculty</a>
+        <a class="dash-nav-link" data-tab="internships">💼 Internships</a>
+        <a class="dash-nav-link" data-tab="create">➕ Create Account</a>
+      </nav>
+
+      <main class="dash-main">
+
+        <!-- Overview -->
+        <section id="tab-overview" class="dash-tab active">
+          <h2 class="dash-page-title">Platform Overview</h2>
+          <div class="stat-cards">
+            <div class="stat-card"><span class="stat-num" id="statStudents">—</span><span class="stat-lbl">Students</span></div>
+            <div class="stat-card"><span class="stat-num" id="statEmployers">—</span><span class="stat-lbl">Employers</span></div>
+            <div class="stat-card"><span class="stat-num" id="statFaculty">—</span><span class="stat-lbl">Faculty</span></div>
+            <div class="stat-card"><span class="stat-num" id="statInternships">—</span><span class="stat-lbl">Internships</span></div>
+            <div class="stat-card"><span class="stat-num" id="statApplications">—</span><span class="stat-lbl">Applications</span></div>
+          </div>
+        </section>
+
+        <!-- All Users (user_profiles) -->
+        <section id="tab-users" class="dash-tab" hidden>
+          <h2 class="dash-page-title">All User Accounts</h2>
+          <div id="usersContainer"><p class="muted-note">Loading…</p></div>
+        </section>
+
+        <!-- Students -->
+        <section id="tab-students" class="dash-tab" hidden>
+          <h2 class="dash-page-title">Registered Students</h2>
+          <div id="studentsContainer"><p class="muted-note">Loading…</p></div>
+        </section>
+
+        <!-- Employers -->
+        <section id="tab-employers" class="dash-tab" hidden>
+          <h2 class="dash-page-title">Registered Employers</h2>
+          <div id="employersContainer"><p class="muted-note">Loading…</p></div>
+        </section>
+
+        <!-- Faculty -->
+        <section id="tab-faculty" class="dash-tab" hidden>
+          <h2 class="dash-page-title">Faculty Members</h2>
+          <div id="facultyContainer"><p class="muted-note">Loading…</p></div>
+        </section>
+
+        <!-- Internships -->
+        <section id="tab-internships" class="dash-tab" hidden>
+          <h2 class="dash-page-title">All Internship Listings</h2>
+          <div id="internshipsContainer"><p class="muted-note">Loading…</p></div>
+        </section>
+
+        <!-- Create Faculty/Admin Account -->
+        <section id="tab-create" class="dash-tab" hidden>
+          <h2 class="dash-page-title">Create Faculty / Admin Account</h2>
+          <p class="muted-note">After creating an account via the Supabase Auth Dashboard, use the form below to assign the role in this portal's database.</p>
+          <div class="dash-card">
+            <form id="createRoleForm">
+              <div class="form-group">
+                <label>User UUID (from Supabase Auth → Users)</label>
+                <input id="crUserId" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" required>
+              </div>
+              <div class="form-group">
+                <label>Display Name</label>
+                <input id="crName" placeholder="Full name">
+              </div>
+              <div class="form-group">
+                <label>Role</label>
+                <select id="crRole">
+                  <option value="faculty">Faculty</option>
+                  <option value="admin">Admin</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Status</label>
+                <select id="crStatus">
+                  <option value="active">Active</option>
+                  <option value="pending">Pending (requires approval)</option>
+                  <option value="disabled">Disabled</option>
+                </select>
+              </div>
+              <button type="submit" class="btn btn-primary">Assign Role</button>
+              <div class="modal-msg" id="createMsg"></div>
+            </form>
+          </div>
+
+          <div class="dash-card" style="margin-top:24px;">
+            <h3>Manage Existing Account Status</h3>
+            <form id="statusForm">
+              <div class="form-group">
+                <label>User UUID</label>
+                <input id="stUserId" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" required>
+              </div>
+              <div class="form-group">
+                <label>New Status</label>
+                <select id="stStatus">
+                  <option value="active">Active</option>
+                  <option value="pending">Pending</option>
+                  <option value="disabled">Disabled</option>
+                </select>
+              </div>
+              <button type="submit" class="btn btn-primary">Update Status</button>
+              <div class="modal-msg" id="statusMsg"></div>
+            </form>
+          </div>
+        </section>
+
+      </main>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" hidden></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/auth.js"></script>
+  <script>
+  (async () => {
+    const loader = document.getElementById('authLoader');
+    const app    = document.getElementById('dashboardApp');
+
+    const ctx = await window.SIP.requireRole('admin');
+    if (!ctx) return;
+
+    const { user } = ctx;
+    const client   = window.SIP.getSupabaseClient();
+
+    loader.hidden = true;
+    app.hidden    = false;
+
+    document.getElementById('dashUserName').textContent = user.user_metadata?.full_name || user.email;
+
+    // --- Overview Stats ---
+    async function loadStats() {
+      const [
+        { count: stCount },
+        { count: empCount },
+        { count: facCount },
+        { count: intCount },
+        { count: appCount }
+      ] = await Promise.all([
+        client.from('students').select('*', { count: 'exact', head: true }),
+        client.from('user_profiles').select('*', { count: 'exact', head: true }).eq('role', 'employer'),
+        client.from('user_profiles').select('*', { count: 'exact', head: true }).eq('role', 'faculty'),
+        client.from('internships').select('*', { count: 'exact', head: true }),
+        client.from('applications').select('*', { count: 'exact', head: true })
+      ]);
+      document.getElementById('statStudents').textContent     = stCount ?? '—';
+      document.getElementById('statEmployers').textContent    = empCount ?? '—';
+      document.getElementById('statFaculty').textContent      = facCount ?? '—';
+      document.getElementById('statInternships').textContent  = intCount ?? '—';
+      document.getElementById('statApplications').textContent = appCount ?? '—';
+    }
+    loadStats();
+
+    // --- All Users ---
+    async function loadUsers() {
+      const { data } = await client.from('user_profiles').select('user_id, role, status, display_name, created_at').order('created_at', { ascending: false });
+      const c = document.getElementById('usersContainer');
+      if (!data?.length) { c.innerHTML = '<p class="muted-note">No users.</p>'; return; }
+      c.innerHTML = `<table class="dash-table">
+        <thead><tr><th>Display Name</th><th>Role</th><th>Status</th><th>Created</th><th>Actions</th></tr></thead>
+        <tbody>${data.map(u => `<tr>
+          <td>${u.display_name || '—'}</td>
+          <td><span class="chip chip-role-${u.role}">${u.role}</span></td>
+          <td><span class="chip chip-${u.status}">${u.status}</span></td>
+          <td>${u.created_at ? new Date(u.created_at).toLocaleDateString() : '—'}</td>
+          <td>
+            <button class="btn btn-sm btn-primary" onclick="toggleStatus('${u.user_id}', '${u.status}')">Toggle Status</button>
+          </td>
+        </tr>`).join('')}</tbody>
+      </table>`;
+    }
+
+    window.toggleStatus = async (userId, currentStatus) => {
+      const newStatus = currentStatus === 'active' ? 'disabled' : 'active';
+      await client.from('user_profiles').update({ status: newStatus }).eq('user_id', userId);
+      loadUsers();
+    };
+
+    // --- Students ---
+    async function loadStudents() {
+      const { data } = await client.from('students').select('*').order('full_name');
+      const c = document.getElementById('studentsContainer');
+      if (!data?.length) { c.innerHTML = '<p class="muted-note">No students.</p>'; return; }
+      c.innerHTML = `<table class="dash-table">
+        <thead><tr><th>Name</th><th>Email</th><th>College</th><th>Dept</th><th>CGPA</th></tr></thead>
+        <tbody>${data.map(s => `<tr><td>${s.full_name||'—'}</td><td>${s.email||'—'}</td><td>${s.college||'—'}</td><td>${s.department||'—'}</td><td>${s.cgpa||'—'}</td></tr>`).join('')}</tbody>
+      </table>`;
+    }
+
+    // --- Employers ---
+    async function loadEmployers() {
+      const { data } = await client.from('employer_profiles').select('*').order('company_name');
+      const c = document.getElementById('employersContainer');
+      if (!data?.length) { c.innerHTML = '<p class="muted-note">No employers.</p>'; return; }
+      c.innerHTML = `<table class="dash-table">
+        <thead><tr><th>Company</th><th>Email</th><th>Industry</th><th>Verified</th><th>Verify</th></tr></thead>
+        <tbody>${data.map(e => `<tr>
+          <td>${e.company_name||'—'}</td><td>${e.company_email||'—'}</td>
+          <td>${e.industry||'—'}</td>
+          <td>${e.verified ? '✅ Yes' : '❌ No'}</td>
+          <td><button class="btn btn-sm btn-primary" onclick="verifyEmployer('${e.user_id}', ${!e.verified})">${e.verified?'Revoke':'Verify'}</button></td>
+        </tr>`).join('')}</tbody>
+      </table>`;
+    }
+    window.verifyEmployer = async (uid, val) => {
+      await client.from('employer_profiles').update({ verified: val }).eq('user_id', uid);
+      loadEmployers();
+    };
+
+    // --- Faculty ---
+    async function loadFaculty() {
+      const { data } = await client.from('faculty_profiles').select('*').order('full_name');
+      const c = document.getElementById('facultyContainer');
+      if (!data?.length) { c.innerHTML = '<p class="muted-note">No faculty added yet.</p>'; return; }
+      c.innerHTML = `<table class="dash-table">
+        <thead><tr><th>Name</th><th>Email</th><th>College</th><th>Dept</th><th>Faculty ID</th></tr></thead>
+        <tbody>${data.map(f => `<tr><td>${f.full_name||'—'}</td><td>${f.email||'—'}</td><td>${f.college||'—'}</td><td>${f.department||'—'}</td><td>${f.faculty_id||'—'}</td></tr>`).join('')}</tbody>
+      </table>`;
+    }
+
+    // --- Internships ---
+    async function loadInternships() {
+      const { data } = await client.from('internships').select('*, employer_profiles(company_name)').order('created_at', { ascending: false });
+      const c = document.getElementById('internshipsContainer');
+      if (!data?.length) { c.innerHTML = '<p class="muted-note">No internships yet.</p>'; return; }
+      c.innerHTML = `<table class="dash-table">
+        <thead><tr><th>Title</th><th>Company</th><th>Domain</th><th>Deadline</th></tr></thead>
+        <tbody>${data.map(i => `<tr><td>${i.title||'—'}</td><td>${i.employer_profiles?.company_name||'—'}</td><td>${i.domain||'—'}</td><td>${i.deadline||'—'}</td></tr>`).join('')}</tbody>
+      </table>`;
+    }
+
+    // --- Tab nav ---
+    document.querySelectorAll('.dash-nav-link').forEach(link => {
+      link.onclick = () => {
+        document.querySelectorAll('.dash-nav-link').forEach(l => l.classList.remove('active'));
+        document.querySelectorAll('.dash-tab').forEach(t => t.hidden = true);
+        link.classList.add('active');
+        const tab = document.getElementById('tab-' + link.dataset.tab);
+        if (tab) {
+          tab.hidden = false;
+          if (link.dataset.tab === 'users')        loadUsers();
+          if (link.dataset.tab === 'students')     loadStudents();
+          if (link.dataset.tab === 'employers')    loadEmployers();
+          if (link.dataset.tab === 'faculty')      loadFaculty();
+          if (link.dataset.tab === 'internships')  loadInternships();
+        }
+      };
+    });
+
+    // --- Create Role Form ---
+    document.getElementById('createRoleForm').onsubmit = async (e) => {
+      e.preventDefault();
+      const msg = document.getElementById('createMsg');
+      const { error } = await client.from('user_profiles').upsert({
+        user_id:      document.getElementById('crUserId').value.trim(),
+        display_name: document.getElementById('crName').value.trim(),
+        role:         document.getElementById('crRole').value,
+        status:       document.getElementById('crStatus').value
+      }, { onConflict: 'user_id' });
+      if (error) { msg.className = 'modal-msg auth-error'; msg.textContent = error.message; }
+      else { msg.className = 'modal-msg auth-success'; msg.textContent = 'Role assigned successfully!'; loadStats(); }
+    };
+
+    // --- Status Form ---
+    document.getElementById('statusForm').onsubmit = async (e) => {
+      e.preventDefault();
+      const msg = document.getElementById('statusMsg');
+      const { error } = await client.from('user_profiles').update({ status: document.getElementById('stStatus').value }).eq('user_id', document.getElementById('stUserId').value.trim());
+      if (error) { msg.className = 'modal-msg auth-error'; msg.textContent = error.message; }
+      else { msg.className = 'modal-msg auth-success'; msg.textContent = 'Status updated!'; }
+    };
+
+    document.getElementById('signOutBtn').onclick = () => window.SIP.signOutAndRedirect();
+  })();
+  </script>
+</body>
+</html>

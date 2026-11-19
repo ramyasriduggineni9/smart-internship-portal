@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Faculty Dashboard — Smart Internship Portal</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/dashboard.css">
+</head>
+<body>
+
+  <div id="authLoader" class="auth-loader">
+    <div class="loader-spin"></div>
+    <p>Verifying your session…</p>
+  </div>
+
+  <div id="dashboardApp" hidden>
+    <header class="dash-header" style="--role-color:#7e3af2;">
+      <div class="dash-header-inner">
+        <div class="dash-brand">
+          <span class="dash-brand-icon">🧑‍🏫</span>
+          <div>
+            <span class="dash-brand-title">Smart Internship Portal</span>
+            <span class="dash-brand-role">Faculty Dashboard</span>
+          </div>
+        </div>
+        <div class="dash-header-right">
+          <span class="dash-user-name" id="dashUserName">—</span>
+          <button class="dash-btn-danger" id="signOutBtn">Sign Out</button>
+        </div>
+      </div>
+    </header>
+
+    <div class="dash-layout">
+      <nav class="dash-sidebar" style="--role-color:#7e3af2;">
+        <a class="dash-nav-link active" data-tab="students">🎓 My Students</a>
+        <a class="dash-nav-link" data-tab="applications">📋 Applications</a>
+        <a class="dash-nav-link" data-tab="approvals">✅ NOC Approvals</a>
+      </nav>
+
+      <main class="dash-main">
+
+        <!-- Students Tab -->
+        <section id="tab-students" class="dash-tab active">
+          <h2 class="dash-page-title">Assigned Students</h2>
+          <div id="studentsContainer"><p class="muted-note">Loading students…</p></div>
+        </section>
+
+        <!-- Applications Tab -->
+        <section id="tab-applications" class="dash-tab" hidden>
+          <h2 class="dash-page-title">Student Internship Applications</h2>
+          <div id="appsContainer"><p class="muted-note">Loading applications…</p></div>
+        </section>
+
+        <!-- NOC Approvals Tab -->
+        <section id="tab-approvals" class="dash-tab" hidden>
+          <h2 class="dash-page-title">Pending NOC Approvals</h2>
+          <p class="muted-note">Review and approve student NOC requests for internship credit recognition.</p>
+          <div id="approvalsContainer"><p class="muted-note">Loading NOC requests…</p></div>
+        </section>
+
+      </main>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" hidden></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/auth.js"></script>
+  <script>
+  (async () => {
+    const loader = document.getElementById('authLoader');
+    const app    = document.getElementById('dashboardApp');
+
+    const ctx = await window.SIP.requireRole('faculty');
+    if (!ctx) return;
+
+    const { user } = ctx;
+    const client   = window.SIP.getSupabaseClient();
+
+    loader.hidden = true;
+    app.hidden    = false;
+
+    // Load faculty name from profile
+    const { data: fp } = await client.from('faculty_profiles').select('full_name, department, college').eq('user_id', user.id).maybeSingle();
+    document.getElementById('dashUserName').textContent = fp?.full_name || user.email;
+
+    // --- Load students (from students table, faculty's department) ---
+    async function loadStudents() {
+      const dept = fp?.department;
+      let query = client.from('students').select('full_name, email, cgpa, department, graduation_year');
+      if (dept) query = query.eq('department', dept);
+      const { data, error } = await query.order('full_name');
+      const c = document.getElementById('studentsContainer');
+      if (error || !data?.length) { c.innerHTML = '<p class="muted-note">No students found for your department.</p>'; return; }
+      c.innerHTML = `<table class="dash-table">
+        <thead><tr><th>Name</th><th>Email</th><th>Dept</th><th>CGPA</th><th>Grad Year</th></tr></thead>
+        <tbody>${data.map(s => `<tr>
+          <td>${s.full_name || '—'}</td>
+          <td>${s.email || '—'}</td>
+          <td>${s.department || '—'}</td>
+          <td>${s.cgpa || '—'}</td>
+          <td>${s.graduation_year || '—'}</td>
+        </tr>`).join('')}</tbody>
+      </table>`;
+    }
+    await loadStudents();
+
+    // --- Load applications ---
+    async function loadApplications() {
+      const { data, error } = await client.from('applications').select('*, students(full_name, email, department), internships(title)').order('created_at', { ascending: false });
+      const c = document.getElementById('appsContainer');
+      if (error || !data?.length) { c.innerHTML = '<p class="muted-note">No applications to review.</p>'; return; }
+      c.innerHTML = `<table class="dash-table">
+        <thead><tr><th>Student</th><th>Role</th><th>Status</th><th>Applied</th></tr></thead>
+        <tbody>${data.map(a => `<tr>
+          <td>${a.students?.full_name || '—'}<br><small>${a.students?.email || ''}</small></td>
+          <td>${a.internships?.title || '—'}</td>
+          <td><span class="chip chip-${a.status}">${a.status}</span></td>
+          <td>${a.created_at ? new Date(a.created_at).toLocaleDateString() : '—'}</td>
+        </tr>`).join('')}</tbody>
+      </table>`;
+    }
+
+    // --- Load NOC approvals ---
+    async function loadApprovals() {
+      const { data, error } = await client.from('noc_requests').select('*, students(full_name, email), internships(title)').eq('faculty_approved', false);
+      const c = document.getElementById('approvalsContainer');
+      if (error || !data?.length) { c.innerHTML = '<p class="muted-note">No pending NOC requests.</p>'; return; }
+      c.innerHTML = data.map(n => `
+        <div class="list-row">
+          <div><b>${n.students?.full_name || 'Student'}</b> — ${n.internships?.title || 'Internship'}</div>
+          <div class="muted-note">${n.students?.email || ''}</div>
+          <div>
+            <button class="btn btn-primary btn-sm" data-noc="${n.id}">✅ Approve NOC</button>
+          </div>
+        </div>`).join('');
+
+      document.querySelectorAll('[data-noc]').forEach(btn => {
+        btn.onclick = async () => {
+          await client.from('noc_requests').update({ faculty_approved: true, faculty_approved_at: new Date().toISOString() }).eq('id', btn.dataset.noc);
+          loadApprovals();
+        };
+      });
+    }
+
+    // Tab nav
+    document.querySelectorAll('.dash-nav-link').forEach(link => {
+      link.onclick = () => {
+        document.querySelectorAll('.dash-nav-link').forEach(l => l.classList.remove('active'));
+        document.querySelectorAll('.dash-tab').forEach(t => t.hidden = true);
+        link.classList.add('active');
+        const tab = document.getElementById('tab-' + link.dataset.tab);
+        if (tab) {
+          tab.hidden = false;
+          if (link.dataset.tab === 'applications') loadApplications();
+          if (link.dataset.tab === 'approvals')    loadApprovals();
+        }
+      };
+    });
+
+    document.getElementById('signOutBtn').onclick = () => window.SIP.signOutAndRedirect();
+  })();
+  </script>
+</body>
+</html>

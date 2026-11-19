@@ -4,524 +4,938 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Smart Internship Portal</title>
-  <meta name="description" content="Smart Internship Portal - Discover verified internships, track applications with real-time status, and streamline academic credit sync.">
-  <meta name="theme-color" content="#0b6b63">
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%230b6b63'><path d='M22 10v6M2 10l10-5 10 5-10 5z'/><path d='M6 12v5c3 3 9 3 12 0v-5' fill='none' stroke='%230b6b63' stroke-width='2'/></svg>">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Caveat:wght@600&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
   <link rel="stylesheet" href="css/styles.css">
+  <style>
+    /* =====================================================================
+       WELCOME PAGE — Role-Based Login Design
+       ===================================================================== */
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'IBM Plex Sans', sans-serif; background: #f7faf9; color: #111827; }
+
+    /* --- NAV ------------------------------------------------------------ */
+    .welcome-nav {
+      position: sticky; top: 0; z-index: 100;
+      background: linear-gradient(90deg, #052824 0%, #0a5a53 60%, #0e7268 100%);
+      box-shadow: 0 2px 20px rgba(5,38,34,0.40);
+    }
+    .welcome-nav-container {
+      max-width: 1240px; margin: 0 auto; padding: 14px 24px;
+      display: flex; align-items: center; justify-content: space-between; gap: 20px;
+    }
+    .welcome-brand { display: flex; align-items: center; gap: 12px; text-decoration: none; color: #fff; }
+    .brand-icon-wrap {
+      width: 40px; height: 40px; border-radius: 10px;
+      background: rgba(255,255,255,0.18); color: #fff;
+      display: grid; place-items: center; font-size: 20px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.20);
+    }
+    .brand-title {
+      display: block; font-family: 'Bricolage Grotesque', sans-serif;
+      font-size: 20px; font-weight: 800; color: #fff; letter-spacing: -0.01em;
+    }
+    .welcome-nav-links { display: flex; align-items: center; gap: 28px; }
+    .welcome-nav-links a { color: rgba(255,255,255,0.75); text-decoration: none; font-weight: 500; font-size: 14px; transition: color 0.15s; }
+    .welcome-nav-links a:hover { color: #fff; }
+    .btn-nav-ghost {
+      background: transparent; border: 1.5px solid rgba(255,255,255,0.50); color: #fff;
+      padding: 8px 18px; border-radius: 8px; font-weight: 600; font-size: 13.5px; cursor: pointer;
+      transition: all 0.18s; text-decoration: none; display: inline-block;
+    }
+    .btn-nav-ghost:hover { background: rgba(255,255,255,0.14); border-color: rgba(255,255,255,0.80); }
+
+    /* --- HERO ----------------------------------------------------------- */
+    .hero-section {
+      background: linear-gradient(135deg, #052824 0%, #0a5a53 40%, #188d83 75%, #1aa99d 100%);
+      padding: 70px 24px 60px; text-align: center;
+      position: relative; overflow: hidden;
+    }
+    .hero-section::before, .hero-section::after {
+      content: ''; position: absolute; border-radius: 50%;
+      background: rgba(255,255,255,0.045); pointer-events: none;
+    }
+    .hero-section::before { width: 480px; height: 480px; top: -140px; right: -100px; }
+    .hero-section::after  { width: 300px; height: 300px; bottom: -80px; left: -60px; background: rgba(255,255,255,0.03); }
+    .hero-eyebrow {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(255,255,255,0.14); border: 1px solid rgba(255,255,255,0.28);
+      padding: 7px 18px; border-radius: 99px; font-size: 13px; font-weight: 700; color: #fff;
+      margin-bottom: 20px; letter-spacing: 0.03em;
+    }
+    .hero-title {
+      font-family: 'Bricolage Grotesque', sans-serif;
+      font-size: 48px; font-weight: 900; color: #fff; letter-spacing: -0.03em; line-height: 1.08;
+      margin-bottom: 16px;
+    }
+    .hero-title .accent { color: #80e8e0; }
+    .hero-desc { font-size: 17px; color: rgba(255,255,255,0.80); line-height: 1.65; max-width: 620px; margin: 0 auto 32px; }
+
+    /* --- ROLE CARDS ----------------------------------------------------- */
+    .roles-section {
+      max-width: 1240px; margin: -32px auto 0; padding: 0 24px;
+      position: relative; z-index: 10;
+    }
+    .roles-label {
+      text-align: center; font-size: 12px; font-weight: 700;
+      letter-spacing: 0.10em; text-transform: uppercase; color: #6b7280; margin-bottom: 16px;
+    }
+    .roles-grid {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px;
+    }
+    .role-card {
+      background: #fff; border-radius: 18px;
+      border: 1.5px solid #e5e9e8;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04);
+      padding: 28px 22px 24px; cursor: pointer;
+      transition: all 0.22s ease; text-align: center;
+      display: flex; flex-direction: column; align-items: center; gap: 12px;
+    }
+    .role-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 20px 50px rgba(0,0,0,0.13);
+      border-color: var(--rc, #0b6b63);
+    }
+    .role-icon {
+      width: 64px; height: 64px; border-radius: 16px;
+      display: grid; place-items: center; font-size: 28px;
+      background: var(--rc-light, #e8f7f6);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      transition: transform 0.2s;
+    }
+    .role-card:hover .role-icon { transform: scale(1.08); }
+    .role-name { font-size: 17px; font-weight: 800; color: #111827; letter-spacing: -0.01em; }
+    .role-desc { font-size: 13px; color: #6b7280; line-height: 1.45; }
+    .role-btn {
+      margin-top: 4px; padding: 10px 24px; border-radius: 9px;
+      border: none; background: var(--rc, #0b6b63); color: #fff;
+      font-size: 13.5px; font-weight: 700; cursor: pointer;
+      transition: all 0.18s; letter-spacing: 0.01em; width: 100%;
+    }
+    .role-btn:hover { filter: brightness(1.10); transform: translateY(-1px); }
+
+    /* --- LANDING SECTIONS ----------------------------------------------- */
+    .landing-section { max-width: 1240px; margin: 0 auto; padding: 80px 24px; }
+    .section-header { text-align: center; max-width: 680px; margin: 0 auto 50px; }
+    .section-eyebrow {
+      display: inline-block; font-size: 12px; font-weight: 700;
+      letter-spacing: 0.08em; text-transform: uppercase; color: #0b6b63; margin-bottom: 10px;
+    }
+    .section-header h2 { font-family: 'Bricolage Grotesque', sans-serif; font-size: 34px; font-weight: 800; letter-spacing: -0.02em; color: #111827; margin-bottom: 10px; }
+    .section-header p { font-size: 15.5px; color: #6b7280; line-height: 1.6; }
+
+    .steps-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+    .step-card { background: #fff; border-radius: 14px; border: 1px solid #e5e9e8; padding: 22px; box-shadow: 0 1px 4px rgba(0,0,0,0.04); }
+    .step-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+    .step-num { font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #0b6b63; }
+    .step-icon { font-size: 22px; }
+    .step-card h3 { font-size: 15px; font-weight: 700; color: #111827; margin-bottom: 6px; }
+    .step-card p  { font-size: 13.5px; color: #6b7280; line-height: 1.5; }
+
+    .features-grid  { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+    .feature-box    { background: #fff; border: 1px solid #e5e9e8; border-radius: 14px; padding: 20px; display: flex; gap: 16px; align-items: flex-start; box-shadow: 0 1px 4px rgba(0,0,0,0.04); }
+    .feature-icon-wrap { font-size: 24px; flex-shrink: 0; margin-top: 2px; }
+    .feature-info h3 { font-size: 15px; font-weight: 700; color: #111827; margin-bottom: 5px; }
+    .feature-info p  { font-size: 13.5px; color: #6b7280; line-height: 1.5; }
+
+    .benefits-grid  { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+    .benefit-card   { background: #fff; border: 1px solid #e5e9e8; border-radius: 14px; padding: 24px; box-shadow: 0 1px 4px rgba(0,0,0,0.04); }
+    .benefit-icon   { font-size: 32px; margin-bottom: 12px; display: block; }
+    .benefit-card h3 { font-size: 16px; font-weight: 700; color: #111827; margin-bottom: 12px; }
+    .benefit-list   { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+    .benefit-list li { font-size: 13.5px; color: #374151; padding-left: 20px; position: relative; line-height: 1.4; }
+    .benefit-list li::before { content: '✓'; position: absolute; left: 0; color: #0b6b63; font-weight: 700; }
+
+    .about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .about-card { background: #fff; border: 1px solid #e5e9e8; border-radius: 14px; padding: 24px; box-shadow: 0 1px 4px rgba(0,0,0,0.04); }
+    .paper-badge {
+      display: inline-block; font-size: 10.5px; font-weight: 700;
+      letter-spacing: 0.08em; text-transform: uppercase;
+      background: #e8f7f6; color: #0b6b63; padding: 3px 10px;
+      border-radius: 99px; margin-bottom: 10px;
+    }
+    .about-card h3 { font-size: 17px; font-weight: 700; color: #111827; margin-bottom: 10px; }
+    .about-card p  { font-size: 13.5px; color: #6b7280; line-height: 1.6; margin-bottom: 10px; }
+    .team-list { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
+    .team-item { display: flex; justify-content: space-between; font-size: 13.5px; padding: 8px 0; border-top: 1px solid #f0f4f3; color: #374151; }
+
+    /* CTA */
+    .section-cta {
+      background: linear-gradient(135deg, #052824 0%, #0a5a53 50%, #0e7268 100%);
+      border-radius: 20px; padding: 56px 40px; text-align: center; color: #fff; margin: 0 24px 60px;
+    }
+    .section-cta h2 { font-family: 'Bricolage Grotesque', sans-serif; font-size: 32px; font-weight: 800; color: #fff; margin-bottom: 12px; }
+    .section-cta p  { color: rgba(255,255,255,0.78); font-size: 15.5px; margin-bottom: 28px; }
+    .cta-btns { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+    .btn-cta-white {
+      background: #fff; color: #0b6b63; border: none;
+      padding: 13px 28px; border-radius: 10px; font-size: 15px; font-weight: 700;
+      cursor: pointer; transition: all 0.18s;
+    }
+    .btn-cta-white:hover { background: #e0faf8; transform: translateY(-2px); }
+    .btn-cta-ghost {
+      background: transparent; border: 2px solid rgba(255,255,255,0.55); color: #fff;
+      padding: 12px 24px; border-radius: 10px; font-size: 15px; font-weight: 700;
+      cursor: pointer; transition: all 0.18s;
+    }
+    .btn-cta-ghost:hover { background: rgba(255,255,255,0.12); border-color: rgba(255,255,255,0.80); }
+
+    /* Footer */
+    .welcome-footer { background: #111827; color: rgba(255,255,255,0.65); font-size: 13.5px; }
+    .footer-container { max-width: 1240px; margin: 0 auto; padding: 50px 24px 32px; display: grid; grid-template-columns: 1.5fr 1fr 1fr 1fr; gap: 40px; }
+    .footer-col h4 { color: #fff; font-size: 13.5px; font-weight: 700; margin-bottom: 14px; }
+    .footer-col a, .footer-col p { display: block; margin-bottom: 8px; color: rgba(255,255,255,0.60); text-decoration: none; }
+    .footer-col a:hover { color: rgba(255,255,255,0.90); }
+    .footer-brand-title { font-size: 16px; font-weight: 700; color: #fff; }
+    .footer-bottom { border-top: 1px solid rgba(255,255,255,0.10); max-width: 1240px; margin: 0 auto; padding: 20px 24px; display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; font-size: 12.5px; }
+
+    /* ---- MODALS -------------------------------------------------------- */
+    .modal-backdrop {
+      position: fixed; inset: 0; z-index: 2000;
+      background: linear-gradient(135deg, rgba(5,38,34,0.88) 0%, rgba(11,107,99,0.72) 60%, rgba(24,141,131,0.60) 100%);
+      backdrop-filter: blur(10px) saturate(1.4);
+      display: grid; place-items: center; padding: 18px; overflow-y: auto;
+    }
+    .modal-backdrop[hidden] { display: none !important; }
+    .modal-card {
+      width: min(100%, 480px); max-height: 92vh; overflow-y: auto;
+      background: #fff; border-radius: 20px; padding: 32px 30px 28px;
+      box-shadow: 0 24px 60px rgba(5,38,34,0.30);
+      display: flex; flex-direction: column; gap: 16px;
+      position: relative; overflow: hidden;
+      animation: modalIn 0.24s ease-out;
+    }
+    @keyframes modalIn { from { opacity:0; transform: translateY(14px) scale(0.97); } to { opacity:1; transform: none; } }
+    .modal-card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 5px;
+      background: var(--modal-accent, linear-gradient(90deg, #0b6b63, #1aa99d));
+      border-radius: 20px 20px 0 0; pointer-events: none;
+    }
+    .modal-card-lg { width: min(100%, 560px); }
+    .modal-header { display: flex; align-items: center; justify-content: space-between; }
+    .modal-header h3 {
+      font-size: 22px; font-weight: 800;
+      background: linear-gradient(135deg, #0b6b63 0%, #188d83 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .modal-role-badge {
+      display: flex; align-items: center; gap: 8px;
+      background: var(--role-light, #e8f7f6); color: var(--role-dark, #0b6b63);
+      border-radius: 99px; padding: 4px 12px; font-size: 12.5px; font-weight: 700;
+      margin-bottom: 4px;
+    }
+    .modal-close { background: none; border: 0; font-size: 24px; color: #9ca3af; cursor: pointer; padding: 2px 6px; border-radius: 6px; transition: all 0.15s; }
+    .modal-close:hover { background: #f3f4f6; color: #374151; }
+    .modal-subtitle { font-size: 13.5px; color: #6b7280; line-height: 1.5; margin-top: -6px; }
+    .form-group { display: flex; flex-direction: column; gap: 5px; margin-bottom: 12px; }
+    .form-group label { font-size: 12.5px; font-weight: 600; color: #374151; }
+    .form-group input, .form-group select, .form-group textarea {
+      width: 100%; padding: 10px 12px; border: 1.5px solid #d1d5db; border-radius: 9px;
+      background: #f9fafb; color: #111827; font-size: 14px; transition: border-color 0.15s, box-shadow 0.15s;
+      font-family: 'IBM Plex Sans', sans-serif;
+    }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+      border-color: #0b6b63; box-shadow: 0 0 0 3px rgba(11,107,99,0.12); outline: none; background: #fff;
+    }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 14px; }
+    .full-width { grid-column: 1 / -1; }
+    .label-row { display: flex; align-items: center; justify-content: space-between; }
+    .pw-wrap { position: relative; }
+    .pw-wrap input { padding-right: 42px; }
+    .pw-toggle {
+      position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+      background: none; border: none; cursor: pointer; font-size: 15px; color: #9ca3af;
+    }
+    .btn-block { width: 100%; }
+    .btn-primary {
+      background: linear-gradient(135deg, #0b6b63, #188d83); color: #fff;
+      border: none; padding: 11px 20px; border-radius: 9px;
+      font-size: 14.5px; font-weight: 700; cursor: pointer; transition: all 0.18s;
+    }
+    .btn-primary:hover { filter: brightness(1.08); transform: translateY(-1px); }
+    .btn-primary:disabled { opacity: 0.65; cursor: not-allowed; transform: none; }
+    .btn-link { background: none; border: none; color: #0b6b63; font-weight: 600; cursor: pointer; font-size: 13px; padding: 0; text-decoration: underline; }
+    .btn-link:hover { color: #0a5a53; }
+    .modal-msg { font-size: 13px; min-height: 16px; margin-top: 4px; line-height: 1.4; }
+    .auth-error   { color: #dc2626; font-weight: 500; }
+    .auth-success { color: #059669; font-weight: 500; }
+    .modal-footer-text { text-align: center; font-size: 13px; color: #9ca3af; margin-top: 8px; }
+    .font-bold { font-weight: 700; }
+
+    /* Toast */
+    .toast {
+      position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+      background: #111827; color: #fff; padding: 12px 22px; border-radius: 10px;
+      font-size: 14px; font-weight: 500; z-index: 3000; box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+      animation: toastIn 0.25s ease-out;
+    }
+    @keyframes toastIn { from { opacity:0; transform: translateX(-50%) translateY(12px); } }
+
+    /* Responsive */
+    @media (max-width: 1000px) { .roles-grid { grid-template-columns: repeat(2,1fr); } }
+    @media (max-width: 700px) {
+      .roles-grid { grid-template-columns: 1fr; }
+      .hero-title  { font-size: 32px; }
+      .steps-grid  { grid-template-columns: 1fr; }
+      .features-grid { grid-template-columns: 1fr; }
+      .benefits-grid { grid-template-columns: 1fr; }
+      .about-grid  { grid-template-columns: 1fr; }
+      .footer-container { grid-template-columns: 1fr 1fr; }
+      .welcome-nav-links { display: none; }
+    }
+  </style>
 </head>
 <body>
 
-  <!-- ======================================================================
-       1. WELCOME / LANDING PAGE
-       ====================================================================== -->
-  <div id="welcomePage">
-    <!-- Top Navigation Bar -->
-    <header class="welcome-nav">
-      <div class="welcome-nav-container">
-        <a href="#welcomePage" class="welcome-brand">
-          <div class="brand-icon-wrap" aria-hidden="true">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
-              <path d="M6 12v5c3 3 9 3 12 0v-5"/>
-            </svg>
-          </div>
-          <span class="brand-title">Smart Internship Portal</span>
-        </a>
+<!-- =========================================================
+     WELCOME PAGE
+     ========================================================= -->
+<div id="welcomePage">
 
-        <nav class="welcome-nav-links" aria-label="Landing Page Navigation">
-          <a href="#how-it-works">How It Works</a>
-          <a href="#features">Features</a>
-          <a href="#about">About</a>
-          <a href="#benefits">Benefits</a>
-        </nav>
-
-        <div class="welcome-nav-actions">
-          <a href="#studentLogin" class="btn btn-nav-outline" id="navLoginBtn">Log In</a>
-          <button type="button" class="btn btn-nav-primary" id="navSignupBtn">Create Account</button>
+  <!-- Nav -->
+  <header class="welcome-nav">
+    <div class="welcome-nav-container">
+      <a href="#" class="welcome-brand">
+        <div class="brand-icon-wrap" aria-hidden="true">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
+            <path d="M6 12v5c3 3 9 3 12 0v-5"/>
+          </svg>
         </div>
-      </div>
-    </header>
-
-    <!-- Login -->
-    <section class="login-stage" id="studentLogin">
-      <div class="login-stage-copy">
-        <p class="login-kicker">Unified Internship & Career Platform</p>
-        <h1>Smart Internship Portal</h1>
-        <p class="login-lead">Find internships, apply in one place, track every stage, and carry the hours into your academic record.</p>
-        <ul class="login-points">
-          <li>Verified employer listings</li>
-          <li>Application status in one view</li>
-          <li>Digital NOC and credit sync</li>
-        </ul>
-      </div>
-
-      <div class="login-panel">
-        <h2>Student Login</h2>
-        <p class="login-panel-note">Use the email and password for your student account.</p>
-        <form id="loginForm">
-          <div class="form-group">
-            <label for="loginEmail">Email address</label>
-            <input id="loginEmail" type="email" placeholder="name@example.com" autocomplete="email" required>
-          </div>
-          <div class="form-group">
-            <div class="label-row">
-              <label for="loginPassword">Password</label>
-              <button type="button" class="btn-link small" id="openForgotBtn">Forgot password?</button>
-            </div>
-            <input id="loginPassword" type="password" placeholder="Enter your password" autocomplete="current-password" required>
-          </div>
-          <button type="submit" class="btn btn-primary btn-block" id="loginSubmitBtn">Log In</button>
-          <div class="modal-msg" id="loginMsg" role="status"></div>
-          <p class="login-switch">New here? <button type="button" class="btn-link font-bold" id="switchToSignup">Create an account</button></p>
-        </form>
-      </div>
-    </section>
-
-    <!-- How It Works Section (6 Steps) -->
-    <section id="how-it-works" class="landing-section">
-      <div class="section-header">
-        <span class="section-eyebrow">PORTAL WORKFLOW</span>
-        <h2>How It Works</h2>
-        <p>A structured, paperless 6-step roadmap connecting classroom learning with accredited industry internships.</p>
-      </div>
-
-      <div class="steps-grid">
-        <!-- Step 1 -->
-        <div class="step-card">
-          <div class="step-header">
-            <span class="step-num">Step 01</span>
-            <div class="step-icon">👤</div>
-          </div>
-          <h3>Create Your Account</h3>
-          <p>Students register and create their profiles with academic roll numbers and college credentials.</p>
-        </div>
-
-        <!-- Step 2 -->
-        <div class="step-card">
-          <div class="step-header">
-            <span class="step-num">Step 02</span>
-            <div class="step-icon">🎯</div>
-          </div>
-          <h3>Build Your Profile</h3>
-          <p>Add educational details, verified skills, completed course prerequisites, and certifications.</p>
-        </div>
-
-        <!-- Step 3 -->
-        <div class="step-card">
-          <div class="step-header">
-            <span class="step-num">Step 03</span>
-            <div class="step-icon">🔍</div>
-          </div>
-          <h3>Discover Internships</h3>
-          <p>Browse open roles from verified employers and filter by role, department, and eligibility.</p>
-        </div>
-
-        <!-- Step 4 -->
-        <div class="step-card">
-          <div class="step-header">
-            <span class="step-num">Step 04</span>
-            <div class="step-icon">⚡</div>
-          </div>
-          <h3>Apply for Internships</h3>
-          <p>Automated screening validates CGPA and prerequisite subjects before one-click submission.</p>
-        </div>
-
-        <!-- Step 5 -->
-        <div class="step-card">
-          <div class="step-header">
-            <span class="step-num">Step 05</span>
-            <div class="step-icon">📋</div>
-          </div>
-          <h3>Track Your Progress</h3>
-          <p>Monitor your application status and interview stages in real time on the interactive Kanban board.</p>
-        </div>
-
-        <!-- Step 6 -->
-        <div class="step-card">
-          <div class="step-header">
-            <span class="step-num">Step 06</span>
-            <div class="step-icon">🚀</div>
-          </div>
-          <h3>Build Your Career</h3>
-          <p>Complete 160 internship hours, route digital NOC e-signatures, and transfer credits directly to your gradebook.</p>
-        </div>
-      </div>
-    </section>
-
-    <!-- Key Features Section -->
-    <section id="features" class="landing-section">
-      <div class="section-header">
-        <span class="section-eyebrow">WHAT YOU CAN DO</span>
-        <h2>Key Platform Features</h2>
-        <p>Built to cut paperwork and keep every application visible from submit to credit.</p>
-      </div>
-
-      <div class="features-grid">
-        <div class="feature-box">
-          <div class="feature-icon-wrap">🛡️</div>
-          <div class="feature-info">
-            <h3>Automated Eligibility Screener</h3>
-            <p>Instantly verifies academic requirements, minimum CGPA thresholds, and completed departmental course modules.</p>
-          </div>
-        </div>
-
-        <div class="feature-box">
-          <div class="feature-icon-wrap">🏢</div>
-          <div class="feature-info">
-            <h3>Verified Employer Onboarding</h3>
-            <p>Vets corporate MCA 21-character CIN, 15-character GSTIN, and corporate domain emails to eliminate scam or unpaid ghost roles.</p>
-          </div>
-        </div>
-
-        <div class="feature-box">
-          <div class="feature-icon-wrap">📊</div>
-          <div class="feature-info">
-            <h3>Real-Time Kanban Application Tracker</h3>
-            <p>Provides complete transparency on application status across Applied, Under Review, Interview, and Selection columns.</p>
-          </div>
-        </div>
-
-        <div class="feature-box">
-          <div class="feature-icon-wrap">✍️</div>
-          <div class="feature-info">
-            <h3>Digital Workflows & E-Signatures</h3>
-            <p>Sequentially routes digital No Objection Certificates (NOC) across Mentor → HOD → Placement Officer with tamper-evident hashes.</p>
-          </div>
-        </div>
-
-        <div class="feature-box">
-          <div class="feature-icon-wrap">🎓</div>
-          <div class="feature-info">
-            <h3>Automated Academic Credit Transfer</h3>
-            <p>Tracks 160 verified internship hours and pushes employer evaluation scores directly into institutional gradebooks for verified academic credits.</p>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- About Section -->
-    <section id="about" class="landing-section">
-      <div class="section-header">
-        <span class="section-eyebrow">PROJECT INITIATIVE</span>
-        <h2>About Smart Internship Portal</h2>
-        <p>A comprehensive academic platform uniting student talent, governance, and industry recruiters.</p>
-      </div>
-
-      <div class="about-grid">
-        <div class="about-card">
-          <span class="paper-badge">PLATFORM INITIATIVE</span>
-          <h3>Smart Internship Platform</h3>
-          <p>
-            An autonomous, data-driven academic platform engineered to modernize the student internship lifecycle, streamline verification, and automate academic credit transfers.
-          </p>
-          <div class="team-list">
-            <div class="team-item">
-              <div><b>Ramyasri Duggineni</b></div>
-              <span>Lead Developer</span>
-            </div>
-            <div class="team-item">
-              <div><b>Jyothsna Kanugula</b></div>
-              <span>Frontend Developer</span>
-            </div>
-            <div class="team-item">
-              <div><b>R. Kalyan</b></div>
-              <span>System Architect</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Benefits Section (3 Columns) -->
-    <section id="benefits" class="landing-section">
-      <div class="section-header">
-        <span class="section-eyebrow">THREE-WAY ECOSYSTEM</span>
-        <h2>Benefits for All Stakeholders</h2>
-        <p>A unified platform creating tangible advantages for students, faculty mentors, and hiring managers.</p>
-      </div>
-
-      <div class="benefits-grid">
-        <!-- Students -->
-        <div class="benefit-card">
-          <div class="benefit-icon">🎓</div>
-          <h3>For Students</h3>
-          <ul class="benefit-list">
-            <li>Internship listings you can filter by role, department, and eligibility</li>
-            <li>No more application black holes with live Kanban status tracking</li>
-            <li>A single place to update your profile, skills, and application documents</li>
-            <li>Seamless paperless NOC approval and guaranteed 2 academic credits</li>
-          </ul>
-        </div>
-
-        <!-- Colleges -->
-        <div class="benefit-card">
-          <div class="benefit-icon">🏛️</div>
-          <h3>For Colleges</h3>
-          <ul class="benefit-list">
-            <li>End-to-end digital approval chain from Faculty Mentor to Department HOD</li>
-            <li>Automated validation of minimum CGPA and prerequisite coursework</li>
-            <li>Live placement analytics and cohort-level skill demand insights</li>
-            <li>Protection against ghost postings through strict corporate verification</li>
-          </ul>
-        </div>
-
-        <!-- Employers -->
-        <div class="benefit-card">
-          <div class="benefit-icon">💼</div>
-          <h3>For Employers</h3>
-          <ul class="benefit-list">
-            <li>Direct access to pre-screened students meeting exact academic criteria</li>
-            <li>Applicants who already meet the academic requirements for the role</li>
-            <li>Structured evaluation portal for submitting performance scores</li>
-            <li>Verified company profile badge building trust with prospective talent</li>
-          </ul>
-        </div>
-      </div>
-    </section>
-
-    <!-- Call to Action Banner -->
-    <div style="max-width: 1240px; margin: 0 auto;">
-      <section class="section-cta">
-        <h2>Ready to Accelerate Your Career Journey?</h2>
-        <p>Create a student account or sign in to browse internships and track your applications.</p>
-        <div class="hero-cta-group">
-          <button type="button" class="btn btn-cta-white" id="ctaGetStartedBtn">Create Student Account →</button>
-          <a href="#studentLogin" class="btn btn-cta-ghost" id="ctaLoginBtn">Sign In to Portal</a>
-        </div>
-      </section>
+        <span class="brand-title">Smart Internship Portal</span>
+      </a>
+      <nav class="welcome-nav-links">
+        <a href="#how-it-works">How It Works</a>
+        <a href="#features">Features</a>
+        <a href="#about">About</a>
+        <a href="#benefits">Benefits</a>
+      </nav>
+      <a href="#role-select" class="btn-nav-ghost">Get Started</a>
     </div>
+  </header>
 
-    <!-- Footer -->
-    <footer class="welcome-footer">
-      <div class="footer-container">
-        <div class="footer-col">
-          <div class="welcome-brand">
-            <div class="brand-icon-wrap" style="width:34px;height:34px;font-size:16px;">🎓</div>
-            <div>
-              <span class="brand-title footer-brand-title">Smart Internship Portal</span>
-            </div>
-          </div>
-          <p style="margin-top:8px;">
-            An autonomous, data-driven platform engineered to revolutionize the student internship lifecycle and academic credit synchronization.
-          </p>
-        </div>
+  <!-- Hero -->
+  <section class="hero-section">
+    <div class="hero-eyebrow">🎓 Smart Internship Portal</div>
+    <h1 class="hero-title">Build Your Skills.<br><span class="accent">Discover Opportunities.</span><br>Shape Your Career.</h1>
+    <p class="hero-desc">Your one-stop platform connecting students, academic institutions, and industries through intelligent skill mapping, internship opportunities, and career development.</p>
+  </section>
 
-        <div class="footer-col">
-          <h4>Navigation</h4>
-          <a href="#welcomePage">Home</a>
-          <a href="#how-it-works">How It Works</a>
-          <a href="#features">Key Features</a>
-          <a href="#about">About Project</a>
-          <a href="#benefits">Stakeholders</a>
-        </div>
+  <!-- Role Selection Cards -->
+  <div id="role-select" class="roles-section" style="padding: 32px 24px 48px;">
+    <p class="roles-label">Select your role to sign in</p>
+    <div class="roles-grid">
 
-        <div class="footer-col">
-          <h4>Platform Support</h4>
-          <p>Smart Internship Portal</p>
-          <p>Academic & Placement Desk</p>
-          <p>Email: support@smartinternship.edu</p>
-        </div>
-
-        <div class="footer-col">
-          <h4>Project Team</h4>
-          <p><b>Core Team:</b></p>
-          <p>Ramyasri Duggineni</p>
-          <p>Jyothsna Kanugula</p>
-          <p>R. Kalyan</p>
-        </div>
+      <!-- Student -->
+      <div class="role-card" style="--rc:#0b6b63;--rc-light:#e8f7f6;" onclick="openLoginModal('student')">
+        <div class="role-icon">🎓</div>
+        <div class="role-name">Student</div>
+        <div class="role-desc">Browse internships, track applications, sync academic credits.</div>
+        <button class="role-btn" style="--rc:#0b6b63;">Student Login</button>
       </div>
 
-      <div class="footer-bottom">
-        <div>© 2026 Smart Internship Portal. All rights reserved.</div>
-        <div>Streamlined Internship Lifecycle & Credit Sync System</div>
+      <!-- Employer -->
+      <div class="role-card" style="--rc:#1a56db;--rc-light:#dbeafe;" onclick="openLoginModal('employer')">
+        <div class="role-icon">🏢</div>
+        <div class="role-name">Employer</div>
+        <div class="role-desc">Post internships, view applicants, manage your company profile.</div>
+        <button class="role-btn" style="--rc:#1a56db;">Employer Login</button>
       </div>
-    </footer>
-  </div>
 
-
-  <!-- ======================================================================
-       2. MODALS / DIALOG BOXES
-       ====================================================================== -->
-
-  <!-- B. Student Create Account Modal -->
-  <div id="signupModal" class="modal-backdrop" hidden>
-    <div class="modal-card modal-card-lg" role="dialog" aria-labelledby="signupTitle" aria-modal="true">
-      <div class="modal-header">
-        <h3 id="signupTitle">Create Student Account</h3>
-        <button type="button" class="modal-close" data-close-modal aria-label="Close dialog">&times;</button>
+      <!-- Faculty -->
+      <div class="role-card" style="--rc:#7e3af2;--rc-light:#ede9fe;" onclick="openLoginModal('faculty')">
+        <div class="role-icon">🧑‍🏫</div>
+        <div class="role-name">Faculty</div>
+        <div class="role-desc">Monitor student progress, review applications, approve NOC requests.</div>
+        <button class="role-btn" style="--rc:#7e3af2;">Faculty Login</button>
       </div>
-      <p class="modal-subtitle">Register to browse verified internships, track applications, and sync academic credit.</p>
 
-      <form id="signupForm">
-        <div class="form-grid">
-          <div class="form-group">
-            <label for="signupFullName">Full name *</label>
-            <input id="signupFullName" type="text" placeholder="e.g. Priya Sharma" autocomplete="name" required>
-          </div>
+      <!-- Admin -->
+      <div class="role-card" style="--rc:#c0392b;--rc-light:#fee2e2;" onclick="openLoginModal('admin')">
+        <div class="role-icon">🛡️</div>
+        <div class="role-name">Admin</div>
+        <div class="role-desc">Manage users, verify employers, oversee all platform activities.</div>
+        <button class="role-btn" style="--rc:#c0392b;">Admin Login</button>
+      </div>
 
-          <div class="form-group">
-            <label for="signupEmail">Email address *</label>
-            <input id="signupEmail" type="email" placeholder="name@example.com" autocomplete="email" required>
-          </div>
-
-          <div class="form-group">
-            <label for="signupPassword">Password *</label>
-            <input id="signupPassword" type="password" minlength="6" placeholder="Min. 6 characters" autocomplete="new-password" required>
-          </div>
-
-          <div class="form-group">
-            <label for="signupConfirmPassword">Confirm password *</label>
-            <input id="signupConfirmPassword" type="password" minlength="6" placeholder="Re-enter password" autocomplete="new-password" required>
-          </div>
-
-          <div class="form-group">
-            <label for="signupCollege">College name *</label>
-            <input id="signupCollege" type="text" placeholder="e.g. ABC Engineering College" required>
-          </div>
-
-          <div class="form-group">
-            <label for="signupDepartment">Department *</label>
-            <select id="signupDepartment" required>
-              <option value="CSE" selected>Computer Science & Engineering (CSE)</option>
-              <option value="IT">Information Technology (IT)</option>
-              <option value="ECE">Electronics & Communication (ECE)</option>
-              <option value="EEE">Electrical & Electronics (EEE)</option>
-              <option value="Data Science">CSE (Data Science)</option>
-              <option value="AI & ML">CSE (AI & Machine Learning)</option>
-              <option value="Mechanical">Mechanical Engineering</option>
-              <option value="Civil">Civil Engineering</option>
-            </select>
-          </div>
-
-          <div class="form-group full-width">
-            <label for="signupGradYear">Graduation year *</label>
-            <select id="signupGradYear" required>
-              <option value="2025">2025</option>
-              <option value="2026">2026</option>
-              <option value="2027" selected>2027</option>
-              <option value="2028">2028</option>
-              <option value="2029">2029</option>
-            </select>
-          </div>
-        </div>
-
-        <button type="submit" class="btn btn-primary btn-block" id="signupSubmitBtn">Create Account</button>
-        <div class="modal-msg" id="signupMsg" role="status"></div>
-
-        <div class="modal-footer-text">
-          Already have an account? <a href="#studentLogin" class="btn-link font-bold" id="switchToLogin">Log In</a>
-        </div>
-      </form>
     </div>
   </div>
 
-  <!-- C. Forgot Password Modal -->
-  <div id="forgotModal" class="modal-backdrop" hidden>
-    <div class="modal-card" role="dialog" aria-labelledby="forgotTitle" aria-modal="true">
-      <div class="modal-header">
-        <h3 id="forgotTitle">Reset Password</h3>
-        <button type="button" class="modal-close" data-close-modal aria-label="Close dialog">&times;</button>
-      </div>
-      <p class="modal-subtitle">Enter your registered email address and we will send you a password reset link.</p>
-
-      <form id="forgotForm">
-        <div class="form-group">
-          <label for="forgotEmail">Email address</label>
-          <input id="forgotEmail" type="email" placeholder="Enter your registered email" required>
-        </div>
-
-        <button type="submit" class="btn btn-primary btn-block" id="forgotSubmitBtn">Send Reset Link</button>
-        <div class="modal-msg" id="forgotMsg" role="status"></div>
-
-        <div class="modal-footer-text">
-          Remember your password? <button type="button" class="btn-link font-bold" id="forgotBackToLogin">Back to Login</button>
-        </div>
-      </form>
+  <!-- How It Works -->
+  <section id="how-it-works" class="landing-section" style="border-top: 1px solid #e5e9e8;">
+    <div class="section-header">
+      <span class="section-eyebrow">Portal Workflow</span>
+      <h2>How It Works</h2>
+      <p>A structured, paperless 6-step roadmap connecting classroom learning with accredited industry internships.</p>
     </div>
-  </div>
-
-  <!-- D. Student Profile Edit Modal -->
-  <div id="profilePanel" class="modal-backdrop" hidden>
-    <div class="modal-card modal-card-lg" role="dialog" aria-labelledby="profileTitle">
-      <div class="modal-header">
-        <h3 id="profileTitle">Student Profile</h3>
-        <button type="button" class="modal-close" id="profileClose" aria-label="Close profile">&times;</button>
-      </div>
-      <p class="modal-subtitle">Your student information is synchronized with your Supabase profile record.</p>
-
-      <form id="profileForm">
-        <div class="form-group">
-          <label for="pfName">Full name</label>
-          <input id="pfName" type="text" placeholder="e.g. Priya Sharma" autocomplete="name" required>
-        </div>
-
-        <div class="form-group">
-          <label for="pfEmail">Email address</label>
-          <input id="pfEmail" type="email" placeholder="name@example.com" readonly style="opacity:0.75;cursor:not-allowed;">
-        </div>
-
-        <div class="form-group">
-          <label for="pfCollege">College name</label>
-          <input id="pfCollege" type="text" placeholder="e.g. ABC Engineering College" required>
-        </div>
-
-        <div class="form-group">
-          <label for="pfDepartment">Department</label>
-          <input id="pfDepartment" type="text" placeholder="e.g. Computer Science & Engineering" required>
-        </div>
-
-        <div class="form-group">
-          <label for="pfYear">Graduation year</label>
-          <input id="pfYear" type="number" min="2020" max="2100" placeholder="e.g. 2027" required>
-        </div>
-
-        <button type="submit" class="btn btn-primary btn-block" style="margin-top:6px;">Save Profile</button>
-        <div class="modal-msg" id="profileMessage" role="status"></div>
-      </form>
+    <div class="steps-grid">
+      <div class="step-card"><div class="step-header"><span class="step-num">Step 01</span><div class="step-icon">👤</div></div><h3>Create Your Account</h3><p>Students register and create their profiles with academic roll numbers and college credentials.</p></div>
+      <div class="step-card"><div class="step-header"><span class="step-num">Step 02</span><div class="step-icon">🎯</div></div><h3>Build Your Profile</h3><p>Add educational details, verified skills, completed course prerequisites, and certifications.</p></div>
+      <div class="step-card"><div class="step-header"><span class="step-num">Step 03</span><div class="step-icon">🔍</div></div><h3>Discover Internships</h3><p>Browse open roles from verified employers and filter by role, department, and eligibility.</p></div>
+      <div class="step-card"><div class="step-header"><span class="step-num">Step 04</span><div class="step-icon">⚡</div></div><h3>Apply for Internships</h3><p>Automated screening validates CGPA and prerequisite subjects before one-click submission.</p></div>
+      <div class="step-card"><div class="step-header"><span class="step-num">Step 05</span><div class="step-icon">📋</div></div><h3>Track Your Progress</h3><p>Monitor your application status and interview stages in real time on the interactive Kanban board.</p></div>
+      <div class="step-card"><div class="step-header"><span class="step-num">Step 06</span><div class="step-icon">🚀</div></div><h3>Build Your Career</h3><p>Complete 160 internship hours, route digital NOC e-signatures, and transfer credits directly to your gradebook.</p></div>
     </div>
-  </div>
+  </section>
 
+  <!-- Key Features -->
+  <section id="features" class="landing-section" style="border-top:1px solid #e5e9e8;background:#f7faf9;">
+    <div class="section-header">
+      <span class="section-eyebrow">What You Can Do</span>
+      <h2>Key Platform Features</h2>
+      <p>Built to cut paperwork and keep every application visible from submit to credit.</p>
+    </div>
+    <div class="features-grid">
+      <div class="feature-box"><div class="feature-icon-wrap">🛡️</div><div class="feature-info"><h3>Automated Eligibility Screener</h3><p>Instantly verifies academic requirements, minimum CGPA thresholds, and completed departmental course modules.</p></div></div>
+      <div class="feature-box"><div class="feature-icon-wrap">🏢</div><div class="feature-info"><h3>Verified Employer Onboarding</h3><p>Vets corporate MCA CIN, GSTIN, and corporate domain emails to eliminate scam or unpaid ghost roles.</p></div></div>
+      <div class="feature-box"><div class="feature-icon-wrap">📊</div><div class="feature-info"><h3>Real-Time Kanban Tracker</h3><p>Provides complete transparency on application status across Applied, Under Review, Interview, and Selection columns.</p></div></div>
+      <div class="feature-box"><div class="feature-icon-wrap">✍️</div><div class="feature-info"><h3>Digital Workflows & E-Signatures</h3><p>Routes digital No Objection Certificates (NOC) across Mentor → HOD → Placement Officer with tamper-evident hashes.</p></div></div>
+      <div class="feature-box"><div class="feature-icon-wrap">🎓</div><div class="feature-info"><h3>Academic Credit Transfer</h3><p>Tracks 160 verified internship hours and pushes employer evaluation scores directly into institutional gradebooks.</p></div></div>
+      <div class="feature-box"><div class="feature-icon-wrap">🔐</div><div class="feature-info"><h3>Role-Based Access Control</h3><p>Four separate portals — Student, Employer, Faculty, Admin — each with strict Supabase RBAC and RLS policies.</p></div></div>
+    </div>
+  </section>
 
-  <!-- ======================================================================
-       3. ORIGINAL SMART INTERNSHIP PORTAL DASHBOARD (PRESERVED)
-       ====================================================================== -->
-  <div id="dashboardApp" hidden>
-    <header class="top">
-      <div class="top-in">
-        <div class="brand">
-          <b>Smart Internship Portal</b>
-          <span>Interactive Career & Internship Platform</span>
-        </div>
-        <div id="accountControls">
-          <button id="profileOpen" type="button">My profile</button>
-          <button id="signOutBtn" type="button">Sign out</button>
-          <div class="seg" role="group" aria-label="View as" id="roles"></div>
+  <!-- About -->
+  <section id="about" class="landing-section" style="border-top:1px solid #e5e9e8;">
+    <div class="section-header">
+      <span class="section-eyebrow">Project Initiative</span>
+      <h2>About Smart Internship Portal</h2>
+      <p>A department-level technical innovation uniting student talent, academic governance, and industry recruiters.</p>
+    </div>
+    <div class="about-grid">
+      <div class="about-card">
+        <span class="paper-badge">Department of CSE</span>
+        <h3>Matrusri Engineering College</h3>
+        <p>An Autonomous Institution affiliated with Osmania University, approved by AICTE, and accredited with NBA and NAAC A+. This project was conceived and designed by <b>Mini Project Team D07</b> to modernize the student internship lifecycle.</p>
+        <div class="team-list">
+          <div class="team-item"><div><b>Ramyasri Duggineni</b></div><span>1608-24-733-200</span></div>
+          <div class="team-item"><div><b>Jyothsna Kanugula</b></div><span>1608-24-733-235</span></div>
+          <div class="team-item"><div><b>R. Kalyan</b></div><span>1608-24-733-245</span></div>
         </div>
       </div>
-    </header>
-
-    <div class="shell">
-      <nav id="nav" aria-label="Sections"></nav>
-      <main id="main"></main>
+      <div class="about-card">
+        <span class="paper-badge">Research Foundation</span>
+        <h3>IEEE Base Paper Alignment</h3>
+        <p>The intelligence layer is grounded in the IEEE ICMNWC 2025 research paper: <i>"Skill-Based Recommender System for Internship and Industry Hiring using Knowledge Graphs"</i> (DOI: <code>10.1109/ICMNWC66779.2025.11354307</code>).</p>
+        <p>Our Smart Internship Portal extends this model into an end-to-end university ecosystem with real-world Supabase authentication, institutional NOC approval chains, and automated gradebook sync.</p>
+      </div>
     </div>
+  </section>
+
+  <!-- Benefits -->
+  <section id="benefits" class="landing-section" style="border-top:1px solid #e5e9e8;background:#f7faf9;">
+    <div class="section-header">
+      <span class="section-eyebrow">Three-Way Ecosystem</span>
+      <h2>Benefits for All Stakeholders</h2>
+      <p>A unified platform creating tangible advantages for students, faculty mentors, and hiring managers.</p>
+    </div>
+    <div class="benefits-grid">
+      <div class="benefit-card"><span class="benefit-icon">🎓</span><h3>For Students</h3><ul class="benefit-list"><li>Internship listings filtered by role, department, and eligibility</li><li>Live Kanban status tracking — no more application black holes</li><li>A single place to update your profile, skills, and documents</li><li>Seamless paperless NOC approval and guaranteed 2 academic credits</li></ul></div>
+      <div class="benefit-card"><span class="benefit-icon">🏛️</span><h3>For Colleges</h3><ul class="benefit-list"><li>End-to-end digital approval chain from Faculty Mentor to Department HOD</li><li>Automated validation of minimum CGPA and prerequisite coursework</li><li>Live placement analytics and cohort-level skill demand insights</li><li>Protection against ghost postings through strict corporate verification</li></ul></div>
+      <div class="benefit-card"><span class="benefit-icon">💼</span><h3>For Employers</h3><ul class="benefit-list"><li>Direct access to pre-screened students meeting exact academic criteria</li><li>Applicants who already meet the academic requirements for the role</li><li>Structured evaluation portal for submitting performance scores</li><li>Verified company profile badge building trust with prospective talent</li></ul></div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <div style="max-width:1240px;margin:0 auto;padding:0 24px;">
+    <section class="section-cta">
+      <h2>Ready to Get Started?</h2>
+      <p>Choose your role and sign in to access your personalized dashboard.</p>
+      <div class="cta-btns">
+        <button class="btn-cta-white" onclick="openLoginModal('student')">Student Login →</button>
+        <button class="btn-cta-ghost" onclick="openLoginModal('employer')">Employer Login</button>
+      </div>
+    </section>
   </div>
 
-  <!-- Global Toast Notification -->
-  <div class="toast" id="toast" hidden></div>
+  <!-- Footer -->
+  <footer class="welcome-footer">
+    <div class="footer-container">
+      <div class="footer-col">
+        <div class="welcome-brand" style="margin-bottom:10px;">
+          <div class="brand-icon-wrap" style="width:34px;height:34px;font-size:16px;background:rgba(255,255,255,0.12);">🎓</div>
+          <div>
+            <span class="footer-brand-title">Smart Internship Portal</span>
+            <span style="display:block;font-size:11.5px;color:rgba(255,255,255,0.50);">Matrusri Engineering College</span>
+          </div>
+        </div>
+        <p>An autonomous, data-driven academic platform engineered by CSE Team D07 to revolutionize the college internship experience.</p>
+      </div>
+      <div class="footer-col"><h4>Navigation</h4><a href="#">Home</a><a href="#how-it-works">How It Works</a><a href="#features">Key Features</a><a href="#about">About Project</a><a href="#benefits">Stakeholders</a></div>
+      <div class="footer-col"><h4>Institution</h4><p>Matrusri Engineering College</p><p>Saidabad, Hyderabad - 500059</p><p>Department of CSE</p><p>Email: hodcse@matrusri.edu.in</p></div>
+      <div class="footer-col"><h4>Project Team</h4><p><b>Team D07:</b></p><p>Ramyasri Duggineni</p><p>Jyothsna Kanugula</p><p>R. Kalyan</p></div>
+    </div>
+    <div class="footer-bottom">
+      <div>© 2026 Smart Internship Portal · Matrusri Engineering College (CSE). All rights reserved.</div>
+      <div>Department of CSE · Team D07</div>
+    </div>
+  </footer>
+
+</div><!-- end #welcomePage -->
 
 
-  <!-- ======================================================================
-       4. SCRIPTS
-       ====================================================================== -->
-  <!-- Supabase JS Client Library -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <!-- Original Application Core Logic -->
-  <script src="js/app.js"></script>
-  <!-- Supabase Authentication & Navigation Flow Integration -->
-  <script src="js/supabase.js"></script>
+<!-- =========================================================
+     MODALS
+     ========================================================= -->
+
+<!-- ── Student Login Modal ───────────────────────────────── -->
+<div id="studentModal" class="modal-backdrop" hidden style="--modal-accent:linear-gradient(90deg,#0b6b63,#1aa99d);">
+  <div class="modal-card" role="dialog" aria-labelledby="stuTitle" aria-modal="true">
+    <div class="modal-header">
+      <h3 id="stuTitle" style="background:linear-gradient(135deg,#0b6b63,#188d83);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Student Login</h3>
+      <button class="modal-close" data-close aria-label="Close">×</button>
+    </div>
+    <div class="modal-role-badge" style="--role-light:#e8f7f6;--role-dark:#0b6b63;">🎓 Student Portal</div>
+    <p class="modal-subtitle">Enter your student account credentials to access your dashboard.</p>
+    <form id="stuLoginForm">
+      <div class="form-group">
+        <label for="stuEmail">Email address</label>
+        <input id="stuEmail" type="email" placeholder="you@college.edu" autocomplete="email" required>
+      </div>
+      <div class="form-group">
+        <div class="label-row">
+          <label for="stuPassword">Password</label>
+          <button type="button" class="btn-link" id="stuForgotBtn">Forgot password?</button>
+        </div>
+        <div class="pw-wrap">
+          <input id="stuPassword" type="password" placeholder="Enter your password" autocomplete="current-password" required>
+          <button type="button" class="pw-toggle" data-target="stuPassword">👁</button>
+        </div>
+      </div>
+      <button type="submit" class="btn btn-primary btn-block" id="stuSubmitBtn">Log In as Student</button>
+      <div class="modal-msg" id="stuMsg" role="status"></div>
+      <div class="modal-footer-text">New here? <button type="button" class="btn-link font-bold" id="openStuSignup">Create a student account</button></div>
+    </form>
+  </div>
+</div>
+
+<!-- ── Student Sign Up Modal ─────────────────────────────── -->
+<div id="stuSignupModal" class="modal-backdrop" hidden style="--modal-accent:linear-gradient(90deg,#0b6b63,#1aa99d);">
+  <div class="modal-card modal-card-lg" role="dialog" aria-modal="true">
+    <div class="modal-header">
+      <h3 style="background:linear-gradient(135deg,#0b6b63,#188d83);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Create Student Account</h3>
+      <button class="modal-close" data-close aria-label="Close">×</button>
+    </div>
+    <div class="modal-role-badge" style="--role-light:#e8f7f6;--role-dark:#0b6b63;">🎓 Student Registration</div>
+    <p class="modal-subtitle">Register to browse verified internships, track applications, and sync academic credit.</p>
+    <form id="stuSignupForm">
+      <div class="form-grid">
+        <div class="form-group"><label>Full name *</label><input id="ssFullName" placeholder="e.g. Priya Sharma" autocomplete="name" required></div>
+        <div class="form-group"><label>College email *</label><input id="ssEmail" type="email" placeholder="you@college.edu" autocomplete="email" required></div>
+        <div class="form-group"><label>Password *</label><div class="pw-wrap"><input id="ssPassword" type="password" minlength="6" placeholder="Min. 6 characters" required><button type="button" class="pw-toggle" data-target="ssPassword">👁</button></div></div>
+        <div class="form-group"><label>Confirm password *</label><div class="pw-wrap"><input id="ssConfirm" type="password" minlength="6" placeholder="Re-enter password" required><button type="button" class="pw-toggle" data-target="ssConfirm">👁</button></div></div>
+        <div class="form-group"><label>College name *</label><input id="ssCollege" placeholder="e.g. ABC Engineering College" required></div>
+        <div class="form-group"><label>Department *</label>
+          <select id="ssDept" required>
+            <option value="CSE">Computer Science &amp; Engineering (CSE)</option>
+            <option value="IT">Information Technology (IT)</option>
+            <option value="ECE">Electronics &amp; Communication (ECE)</option>
+            <option value="EEE">Electrical &amp; Electronics (EEE)</option>
+            <option value="Data Science">CSE (Data Science)</option>
+            <option value="AI &amp; ML">CSE (AI &amp; Machine Learning)</option>
+            <option value="Mechanical">Mechanical Engineering</option>
+            <option value="Civil">Civil Engineering</option>
+          </select>
+        </div>
+        <div class="form-group full-width"><label>Graduation year *</label>
+          <select id="ssGradYear" required>
+            <option value="2025">2025</option>
+            <option value="2026">2026</option>
+            <option value="2027" selected>2027</option>
+            <option value="2028">2028</option>
+            <option value="2029">2029</option>
+          </select>
+        </div>
+      </div>
+      <button type="submit" class="btn btn-primary btn-block" id="ssSubmitBtn">Create Student Account</button>
+      <div class="modal-msg" id="ssMsg" role="status"></div>
+      <div class="modal-footer-text">Already have an account? <button type="button" class="btn-link font-bold" id="backToStuLogin">Log In</button></div>
+    </form>
+  </div>
+</div>
+
+<!-- ── Employer Login Modal ──────────────────────────────── -->
+<div id="empModal" class="modal-backdrop" hidden style="--modal-accent:linear-gradient(90deg,#1a56db,#4f83e9);">
+  <div class="modal-card" role="dialog" aria-modal="true">
+    <div class="modal-header">
+      <h3 style="background:linear-gradient(135deg,#1a56db,#4f83e9);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Employer Login</h3>
+      <button class="modal-close" data-close>×</button>
+    </div>
+    <div class="modal-role-badge" style="--role-light:#dbeafe;--role-dark:#1a56db;">🏢 Employer Portal</div>
+    <p class="modal-subtitle">Sign in to manage your company profile, post internships, and review applicants.</p>
+    <form id="empLoginForm">
+      <div class="form-group"><label>Email address</label><input id="empEmail" type="email" placeholder="contact@company.com" autocomplete="email" required></div>
+      <div class="form-group">
+        <div class="label-row"><label>Password</label><button type="button" class="btn-link" id="empForgotBtn">Forgot password?</button></div>
+        <div class="pw-wrap"><input id="empPassword" type="password" placeholder="Enter your password" autocomplete="current-password" required><button type="button" class="pw-toggle" data-target="empPassword">👁</button></div>
+      </div>
+      <button type="submit" class="btn btn-primary btn-block" id="empSubmitBtn" style="background:linear-gradient(135deg,#1a56db,#4f83e9);">Log In as Employer</button>
+      <div class="modal-msg" id="empMsg" role="status"></div>
+      <div class="modal-footer-text">New employer? <button type="button" class="btn-link font-bold" id="openEmpSignup">Register your company</button></div>
+    </form>
+  </div>
+</div>
+
+<!-- ── Employer Sign Up Modal ────────────────────────────── -->
+<div id="empSignupModal" class="modal-backdrop" hidden style="--modal-accent:linear-gradient(90deg,#1a56db,#4f83e9);">
+  <div class="modal-card modal-card-lg" role="dialog" aria-modal="true">
+    <div class="modal-header">
+      <h3 style="background:linear-gradient(135deg,#1a56db,#4f83e9);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Register as Employer</h3>
+      <button class="modal-close" data-close>×</button>
+    </div>
+    <div class="modal-role-badge" style="--role-light:#dbeafe;--role-dark:#1a56db;">🏢 Employer Registration</div>
+    <p class="modal-subtitle">Create an employer account to post internships and connect with pre-screened students.</p>
+    <form id="empSignupForm">
+      <div class="form-grid">
+        <div class="form-group"><label>Contact Name *</label><input id="esFullName" placeholder="Your full name" required></div>
+        <div class="form-group"><label>Company Name *</label><input id="esCompany" placeholder="e.g. TechCorp Pvt. Ltd." required></div>
+        <div class="form-group"><label>Company Email *</label><input id="esEmail" type="email" placeholder="hr@company.com" autocomplete="email" required></div>
+        <div class="form-group"><label>Contact Phone</label><input id="esPhone" type="tel" placeholder="+91 9000000000"></div>
+        <div class="form-group"><label>Industry</label><input id="esIndustry" placeholder="e.g. IT Services, FinTech"></div>
+        <div class="form-group"><label>Website</label><input id="esWebsite" type="url" placeholder="https://company.com"></div>
+        <div class="form-group full-width"><label>Password *</label><div class="pw-wrap"><input id="esPassword" type="password" minlength="6" placeholder="Min. 6 characters" required><button type="button" class="pw-toggle" data-target="esPassword">👁</button></div></div>
+        <div class="form-group full-width"><label>Confirm Password *</label><div class="pw-wrap"><input id="esConfirm" type="password" minlength="6" placeholder="Re-enter password" required><button type="button" class="pw-toggle" data-target="esConfirm">👁</button></div></div>
+      </div>
+      <button type="submit" class="btn btn-primary btn-block" id="esSubmitBtn" style="background:linear-gradient(135deg,#1a56db,#4f83e9);">Register as Employer</button>
+      <div class="modal-msg" id="esMsg" role="status"></div>
+      <div class="modal-footer-text">Already registered? <button type="button" class="btn-link font-bold" id="backToEmpLogin">Log In</button></div>
+    </form>
+  </div>
+</div>
+
+<!-- ── Faculty Login Modal ───────────────────────────────── -->
+<div id="facModal" class="modal-backdrop" hidden style="--modal-accent:linear-gradient(90deg,#7e3af2,#9f6fe8);">
+  <div class="modal-card" role="dialog" aria-modal="true">
+    <div class="modal-header">
+      <h3 style="background:linear-gradient(135deg,#7e3af2,#9f6fe8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Faculty Login</h3>
+      <button class="modal-close" data-close>×</button>
+    </div>
+    <div class="modal-role-badge" style="--role-light:#ede9fe;--role-dark:#7e3af2;">🧑‍🏫 Faculty Portal</div>
+    <p class="modal-subtitle">Faculty accounts are created by the administrator. Contact your admin if you do not have access.</p>
+    <form id="facLoginForm">
+      <div class="form-group"><label>Faculty Email</label><input id="facEmail" type="email" placeholder="faculty@college.edu" autocomplete="email" required></div>
+      <div class="form-group">
+        <div class="label-row"><label>Password</label><button type="button" class="btn-link" id="facForgotBtn">Forgot password?</button></div>
+        <div class="pw-wrap"><input id="facPassword" type="password" placeholder="Enter your password" autocomplete="current-password" required><button type="button" class="pw-toggle" data-target="facPassword">👁</button></div>
+      </div>
+      <button type="submit" class="btn btn-primary btn-block" id="facSubmitBtn" style="background:linear-gradient(135deg,#7e3af2,#9f6fe8);">Log In as Faculty</button>
+      <div class="modal-msg" id="facMsg" role="status"></div>
+      <div class="modal-footer-text"><a href="#" class="btn-link" onclick="closeAllModals()">← Back to Home</a></div>
+    </form>
+  </div>
+</div>
+
+<!-- ── Admin Login Modal ─────────────────────────────────── -->
+<div id="admModal" class="modal-backdrop" hidden style="--modal-accent:linear-gradient(90deg,#c0392b,#e74c3c);">
+  <div class="modal-card" role="dialog" aria-modal="true">
+    <div class="modal-header">
+      <h3 style="background:linear-gradient(135deg,#c0392b,#e74c3c);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Admin Login</h3>
+      <button class="modal-close" data-close>×</button>
+    </div>
+    <div class="modal-role-badge" style="--role-light:#fee2e2;--role-dark:#c0392b;">🛡️ Admin Portal</div>
+    <p class="modal-subtitle">Restricted access. Only authorized administrators may sign in here.</p>
+    <form id="admLoginForm">
+      <div class="form-group"><label>Admin Email</label><input id="admEmail" type="email" placeholder="admin@institution.edu" autocomplete="email" required></div>
+      <div class="form-group">
+        <div class="label-row"><label>Password</label><button type="button" class="btn-link" id="admForgotBtn">Forgot password?</button></div>
+        <div class="pw-wrap"><input id="admPassword" type="password" placeholder="Enter your password" autocomplete="current-password" required><button type="button" class="pw-toggle" data-target="admPassword">👁</button></div>
+      </div>
+      <button type="submit" class="btn btn-primary btn-block" id="admSubmitBtn" style="background:linear-gradient(135deg,#c0392b,#e74c3c);">Log In as Admin</button>
+      <div class="modal-msg" id="admMsg" role="status"></div>
+      <div class="modal-footer-text"><a href="#" class="btn-link" onclick="closeAllModals()">← Back to Home</a></div>
+    </form>
+  </div>
+</div>
+
+<!-- ── Forgot Password Modal ─────────────────────────────── -->
+<div id="forgotModal" class="modal-backdrop" hidden>
+  <div class="modal-card" role="dialog" aria-modal="true">
+    <div class="modal-header">
+      <h3>Reset Password</h3>
+      <button class="modal-close" data-close>×</button>
+    </div>
+    <p class="modal-subtitle">Enter your registered email address. A reset link will be sent to your inbox.</p>
+    <form id="forgotForm">
+      <div class="form-group"><label>Email address</label><input id="forgotEmail" type="email" placeholder="Enter your registered email" required></div>
+      <button type="submit" class="btn btn-primary btn-block" id="forgotSubmitBtn">Send Reset Link</button>
+      <div class="modal-msg" id="forgotMsg" role="status"></div>
+      <div class="modal-footer-text">Remember your password? <button type="button" class="btn-link font-bold" id="forgotBackBtn">Back to Login</button></div>
+    </form>
+  </div>
+</div>
+
+<div class="toast" id="toast" hidden></div>
+
+
+<!-- =========================================================
+     SCRIPTS
+     ========================================================= -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/auth.js"></script>
+<script>
+/* ============================================================
+   INDEX.HTML — Welcome Page Auth Logic (RBAC)
+   ============================================================ */
+(async () => {
+  const client = window.SIP.getSupabaseClient();
+  const ROLE_DASHBOARD = window.SIP.ROLE_DASHBOARD;
+
+  /* ---- Utility ---- */
+  const $ = id => document.getElementById(id);
+
+  function say(id, msg, isErr = true) {
+    const el = $(id);
+    if (!el) return;
+    el.textContent = msg;
+    el.className = isErr ? 'modal-msg auth-error' : 'modal-msg auth-success';
+  }
+
+  /* ---- Modal Management ---- */
+  const allModals = ['studentModal','stuSignupModal','empModal','empSignupModal','facModal','admModal','forgotModal'];
+
+  window.closeAllModals = () => {
+    allModals.forEach(id => { const m = $(id); if (m) m.hidden = true; });
+    document.body.style.overflow = '';
+  };
+
+  window.openLoginModal = (role) => {
+    closeAllModals();
+    const map = { student:'studentModal', employer:'empModal', faculty:'facModal', admin:'admModal' };
+    const m = $(map[role]);
+    if (m) { m.hidden = false; document.body.style.overflow = 'hidden'; }
+  };
+
+  // Close on backdrop click or [data-close] button
+  document.addEventListener('click', e => {
+    if (e.target.matches('[data-close]') || e.target.classList.contains('modal-backdrop')) {
+      closeAllModals();
+    }
+  });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeAllModals(); });
+
+  // Show/hide password toggles
+  document.querySelectorAll('.pw-toggle').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const inp = $(btn.dataset.target);
+      if (!inp) return;
+      inp.type = inp.type === 'password' ? 'text' : 'password';
+      btn.textContent = inp.type === 'password' ? '👁' : '🙈';
+    });
+  });
+
+  /* ---- If already logged in, redirect to their dashboard ---- */
+  if (client) {
+    const { data: { session } } = await client.auth.getSession();
+    if (session?.user) {
+      const prof = await window.SIP.getUserRole(client, session.user.id).catch(() => null);
+      if (prof?.role && prof.status === 'active' && ROLE_DASHBOARD[prof.role]) {
+        window.location.href = ROLE_DASHBOARD[prof.role];
+        return;
+      }
+    }
+  }
+
+  /* ---- Core Login Function (shared) ---- */
+  async function doLogin({ emailId, passwordId, msgId, submitId, submitLabel, expectedRole }) {
+    say(msgId, '');
+    const email    = $(emailId)?.value.trim();
+    const password = $(passwordId)?.value;
+    if (!email || !password) { say(msgId, 'Please enter both email and password.'); return; }
+
+    const btn = $(submitId);
+    if (btn) { btn.disabled = true; btn.textContent = 'Signing in…'; }
+
+    try {
+      if (!client) throw new Error('Authentication service unavailable. Please try again later.');
+
+      // 1. Supabase sign in
+      const { data, error } = await client.auth.signInWithPassword({ email, password });
+      if (error) {
+        if (error.message.includes('Invalid login credentials')) throw new Error('Invalid email or password.');
+        if (error.message.includes('Email not confirmed')) throw new Error('Please verify your email address first. Check your inbox.');
+        throw error;
+      }
+
+      const user = data.session?.user;
+      if (!user) throw new Error('Authentication failed. Please try again.');
+
+      // 2. Fetch role from user_profiles
+      const prof = await window.SIP.getUserRole(client, user.id);
+
+      if (!prof) {
+        await client.auth.signOut();
+        throw new Error('Your account profile was not found. Please contact the administrator.');
+      }
+
+      if (prof.status === 'disabled') {
+        await client.auth.signOut();
+        throw new Error('Your account has been disabled. Contact the administrator.');
+      }
+
+      if (prof.status === 'pending') {
+        await client.auth.signOut();
+        throw new Error('Your account is pending administrator approval.');
+      }
+
+      // 3. Validate role
+      if (prof.role !== expectedRole) {
+        await client.auth.signOut();
+        throw new Error(`Access denied: Your account is not authorized for the ${expectedRole} portal. Please use the correct login.`);
+      }
+
+      // 4. Redirect to the correct dashboard
+      window.location.href = ROLE_DASHBOARD[prof.role];
+
+    } catch (err) {
+      say(msgId, err.message || 'Login failed. Please try again.');
+      if (btn) { btn.disabled = false; btn.textContent = submitLabel; }
+    }
+  }
+
+  /* ---- Student Login ---- */
+  $('stuLoginForm')?.addEventListener('submit', e => {
+    e.preventDefault();
+    doLogin({ emailId:'stuEmail', passwordId:'stuPassword', msgId:'stuMsg', submitId:'stuSubmitBtn', submitLabel:'Log In as Student', expectedRole:'student' });
+  });
+  $('openStuSignup')?.addEventListener('click',  () => { closeAllModals(); $('stuSignupModal').hidden = false; });
+  $('backToStuLogin')?.addEventListener('click', () => { closeAllModals(); $('studentModal').hidden  = false; });
+  $('stuForgotBtn')?.addEventListener('click',   () => { closeAllModals(); $('forgotModal').hidden   = false; });
+
+  /* ---- Student Sign Up ---- */
+  $('stuSignupForm')?.addEventListener('submit', async e => {
+    e.preventDefault();
+    say('ssMsg', '');
+    const fullName  = $('ssFullName')?.value.trim();
+    const email     = $('ssEmail')?.value.trim();
+    const password  = $('ssPassword')?.value;
+    const confirm   = $('ssConfirm')?.value;
+    const college   = $('ssCollege')?.value.trim();
+    const dept      = $('ssDept')?.value;
+    const gradYear  = $('ssGradYear')?.value;
+
+    if (!fullName || !email || !password || !college || !dept || !gradYear) { say('ssMsg','Please fill in all required fields.'); return; }
+    if (password.length < 6) { say('ssMsg','Password must be at least 6 characters.'); return; }
+    if (password !== confirm) { say('ssMsg','Passwords do not match.'); return; }
+
+    const btn = $('ssSubmitBtn');
+    btn.disabled = true; btn.textContent = 'Creating account…';
+
+    try {
+      const { data, error } = await client.auth.signUp({
+        email, password,
+        options: { data: { full_name: fullName, college, department: dept, graduation_year: Number(gradYear) } }
+      });
+      if (error) throw error;
+
+      if (data.user) {
+        // Insert into user_profiles with role='student'
+        await client.from('user_profiles').upsert({
+          user_id: data.user.id, role: 'student', status: 'active', display_name: fullName
+        }, { onConflict: 'user_id' });
+
+        // Insert into students table
+        await client.from('students').upsert({
+          user_id: data.user.id, full_name: fullName, email,
+          college, department: dept, graduation_year: Number(gradYear), cgpa: 0.0
+        }, { onConflict: 'user_id' });
+      }
+
+      if (data.session) {
+        window.location.href = ROLE_DASHBOARD.student;
+      } else {
+        say('ssMsg', '✅ Account created! Check your email inbox to verify, then log in.', false);
+        setTimeout(() => { closeAllModals(); $('studentModal').hidden = false; say('stuMsg', 'Account created! Verify your email, then log in.', false); }, 2600);
+      }
+    } catch (err) {
+      say('ssMsg', err.message || 'Registration failed.');
+      btn.disabled = false; btn.textContent = 'Create Student Account';
+    }
+  });
+
+  /* ---- Employer Login ---- */
+  $('empLoginForm')?.addEventListener('submit', e => {
+    e.preventDefault();
+    doLogin({ emailId:'empEmail', passwordId:'empPassword', msgId:'empMsg', submitId:'empSubmitBtn', submitLabel:'Log In as Employer', expectedRole:'employer' });
+  });
+  $('openEmpSignup')?.addEventListener('click',  () => { closeAllModals(); $('empSignupModal').hidden = false; });
+  $('backToEmpLogin')?.addEventListener('click', () => { closeAllModals(); $('empModal').hidden       = false; });
+  $('empForgotBtn')?.addEventListener('click',   () => { closeAllModals(); $('forgotModal').hidden    = false; });
+
+  /* ---- Employer Sign Up ---- */
+  $('empSignupForm')?.addEventListener('submit', async e => {
+    e.preventDefault();
+    say('esMsg', '');
+    const fullName  = $('esFullName')?.value.trim();
+    const company   = $('esCompany')?.value.trim();
+    const email     = $('esEmail')?.value.trim();
+    const phone     = $('esPhone')?.value.trim();
+    const industry  = $('esIndustry')?.value.trim();
+    const website   = $('esWebsite')?.value.trim();
+    const password  = $('esPassword')?.value;
+    const confirm   = $('esConfirm')?.value;
+
+    if (!fullName || !company || !email || !password) { say('esMsg','Please fill in all required fields.'); return; }
+    if (password !== confirm) { say('esMsg','Passwords do not match.'); return; }
+
+    const btn = $('esSubmitBtn');
+    btn.disabled = true; btn.textContent = 'Registering…';
+
+    try {
+      const { data, error } = await client.auth.signUp({
+        email, password,
+        options: { data: { full_name: fullName, company_name: company } }
+      });
+      if (error) throw error;
+
+      if (data.user) {
+        await client.from('user_profiles').upsert({ user_id: data.user.id, role: 'employer', status: 'active', display_name: fullName }, { onConflict: 'user_id' });
+        await client.from('employer_profiles').upsert({ user_id: data.user.id, company_name: company, company_email: email, contact_phone: phone, website, industry }, { onConflict: 'user_id' });
+      }
+
+      if (data.session) {
+        window.location.href = ROLE_DASHBOARD.employer;
+      } else {
+        say('esMsg', '✅ Account created! Check your email to verify, then log in.', false);
+        setTimeout(() => { closeAllModals(); $('empModal').hidden = false; say('empMsg','Account created! Verify your email, then log in.', false); }, 2600);
+      }
+    } catch (err) {
+      say('esMsg', err.message || 'Registration failed.');
+      btn.disabled = false; btn.textContent = 'Register as Employer';
+    }
+  });
+
+  /* ---- Faculty Login ---- */
+  $('facLoginForm')?.addEventListener('submit', e => {
+    e.preventDefault();
+    doLogin({ emailId:'facEmail', passwordId:'facPassword', msgId:'facMsg', submitId:'facSubmitBtn', submitLabel:'Log In as Faculty', expectedRole:'faculty' });
+  });
+  $('facForgotBtn')?.addEventListener('click', () => { closeAllModals(); $('forgotModal').hidden = false; });
+
+  /* ---- Admin Login ---- */
+  $('admLoginForm')?.addEventListener('submit', e => {
+    e.preventDefault();
+    doLogin({ emailId:'admEmail', passwordId:'admPassword', msgId:'admMsg', submitId:'admSubmitBtn', submitLabel:'Log In as Admin', expectedRole:'admin' });
+  });
+  $('admForgotBtn')?.addEventListener('click', () => { closeAllModals(); $('forgotModal').hidden = false; });
+
+  /* ---- Forgot Password ---- */
+  $('forgotForm')?.addEventListener('submit', async e => {
+    e.preventDefault();
+    say('forgotMsg', '');
+    const email = $('forgotEmail')?.value.trim();
+    if (!email) { say('forgotMsg','Enter your registered email address.'); return; }
+    const btn = $('forgotSubmitBtn');
+    btn.disabled = true; btn.textContent = 'Sending…';
+    const { error } = await client.auth.resetPasswordForEmail(email, { redirectTo: window.location.origin });
+    if (error) { say('forgotMsg', error.message); }
+    else { say('forgotMsg', '✅ Reset link sent! Check your inbox.', false); }
+    btn.disabled = false; btn.textContent = 'Send Reset Link';
+  });
+
+  $('forgotBackBtn')?.addEventListener('click', () => { closeAllModals(); });
+
+})();
+</script>
 
 </body>
 </html>

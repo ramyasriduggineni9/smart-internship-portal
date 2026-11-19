@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Student Dashboard — Smart Internship Portal</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/dashboard.css">
+  <style>
+    /* Student dashboard accent overrides */
+    :root { --role-color: #0b6b63; --role-light: #e8f7f6; }
+  </style>
+</head>
+<body>
+
+  <!-- Loading Screen -->
+  <div id="authLoader" class="auth-loader">
+    <div class="loader-spin"></div>
+    <p>Verifying your session…</p>
+  </div>
+
+  <!-- Student Dashboard App -->
+  <div id="dashboardApp" hidden>
+
+    <!-- Top Bar -->
+    <header class="dash-header" style="--role-color:#0b6b63;">
+      <div class="dash-header-inner">
+        <div class="dash-brand">
+          <span class="dash-brand-icon">🎓</span>
+          <div>
+            <span class="dash-brand-title">Smart Internship Portal</span>
+            <span class="dash-brand-role">Student Dashboard</span>
+          </div>
+        </div>
+        <div class="dash-header-right">
+          <span class="dash-user-name" id="dashUserName">—</span>
+          <button class="dash-btn-secondary" id="profileOpenBtn">My Profile</button>
+          <button class="dash-btn-danger" id="signOutBtn">Sign Out</button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Student Content (original app.js dashboard rendered here) -->
+    <div class="shell">
+      <nav id="nav" aria-label="Sections"></nav>
+      <main id="main"></main>
+    </div>
+
+  </div>
+
+  <!-- Profile Edit Modal -->
+  <div id="profilePanel" class="modal-backdrop" hidden>
+    <div class="modal-card modal-card-lg" role="dialog" aria-labelledby="profileTitle">
+      <div class="modal-header">
+        <h3 id="profileTitle">Student Profile</h3>
+        <button type="button" class="modal-close" id="profileClose" aria-label="Close">×</button>
+      </div>
+      <p class="modal-subtitle">Your information is synced with your Supabase student record.</p>
+      <form id="profileForm">
+        <div class="form-group">
+          <label for="pfName">Full name</label>
+          <input id="pfName" required>
+        </div>
+        <div class="form-group">
+          <label for="pfEmail">Email</label>
+          <input id="pfEmail" type="email" readonly style="opacity:.75;cursor:not-allowed;">
+        </div>
+        <div class="form-group">
+          <label for="pfCollege">College</label>
+          <input id="pfCollege" required>
+        </div>
+        <div class="form-group">
+          <label for="pfDepartment">Department</label>
+          <input id="pfDepartment" required>
+        </div>
+        <div class="form-group">
+          <label for="pfYear">Graduation Year</label>
+          <input id="pfYear" type="number" min="2020" max="2100" required>
+        </div>
+        <button type="submit" class="btn btn-primary btn-block" style="margin-top:8px;">Save Profile</button>
+        <div class="modal-msg" id="profileMessage" role="status"></div>
+      </form>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" hidden></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+  (async () => {
+    const loader = document.getElementById('authLoader');
+    const app    = document.getElementById('dashboardApp');
+
+    // Require student role
+    const ctx = await window.SIP.requireRole('student');
+    if (!ctx) return; // redirected
+
+    const { user } = ctx;
+    const client   = window.SIP.getSupabaseClient();
+
+    // Show dashboard
+    loader.hidden = true;
+    app.hidden    = false;
+
+    // Set name
+    const nameEl = document.getElementById('dashUserName');
+    if (nameEl) nameEl.textContent = user.user_metadata?.full_name || user.email;
+
+    // Render the original student app (app.js)
+    if (typeof window.renderDashboard === 'function') window.renderDashboard();
+
+    /* ----- Profile ---- */
+    async function loadProfile() {
+      const { data } = await client.from('students').select('*').eq('user_id', user.id).maybeSingle();
+      document.getElementById('pfName').value       = data?.full_name || user.user_metadata?.full_name || '';
+      document.getElementById('pfEmail').value      = user.email;
+      document.getElementById('pfCollege').value    = data?.college || user.user_metadata?.college || '';
+      document.getElementById('pfDepartment').value = data?.department || user.user_metadata?.department || '';
+      document.getElementById('pfYear').value       = data?.graduation_year || user.user_metadata?.graduation_year || '';
+      if (window.S?.student && data?.full_name) window.S.student.name = data.full_name;
+    }
+    await loadProfile();
+
+    document.getElementById('profileOpenBtn').onclick  = () => { document.getElementById('profilePanel').hidden = false; };
+    document.getElementById('profileClose').onclick    = () => { document.getElementById('profilePanel').hidden = true;  };
+
+    document.getElementById('profileForm').onsubmit = async (e) => {
+      e.preventDefault();
+      const msg  = document.getElementById('profileMessage');
+      msg.textContent = '';
+      const row = {
+        user_id: user.id,
+        full_name:       document.getElementById('pfName').value.trim(),
+        email:           user.email,
+        college:         document.getElementById('pfCollege').value.trim(),
+        department:      document.getElementById('pfDepartment').value.trim(),
+        graduation_year: Number(document.getElementById('pfYear').value)
+      };
+      const { error } = await client.from('students').upsert(row, { onConflict: 'user_id' });
+      if (error) { msg.className = 'modal-msg auth-error'; msg.textContent = error.message; }
+      else {
+        msg.className = 'modal-msg auth-success'; msg.textContent = 'Profile saved!';
+        if (window.S?.student) window.S.student.name = row.full_name;
+        if (window.renderDashboard) window.renderDashboard();
+        setTimeout(() => { document.getElementById('profilePanel').hidden = true; }, 1200);
+      }
+    };
+
+    /* ----- Sign Out ---- */
+    document.getElementById('signOutBtn').onclick = () => window.SIP.signOutAndRedirect();
+  })();
+  </script>
+</body>
+</html>

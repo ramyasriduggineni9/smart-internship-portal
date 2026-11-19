@@ -1,0 +1,225 @@
+/* ==========================================================================
+   Smart Internship Portal — Shared Dashboard CSS
+   Used by student.html, employer.html, faculty.html, admin.html
+   ========================================================================== */
+
+/* Auth loader */
+.auth-loader {
+  position: fixed; inset: 0;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 16px;
+  background: #f7faf9; z-index: 9999;
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 15px; color: #0b6b63;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+.loader-spin {
+  width: 36px; height: 36px;
+  border: 3px solid #d1ede9;
+  border-top-color: #0b6b63;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+/* ---- Header ---- */
+.dash-header {
+  position: sticky; top: 0; z-index: 200;
+  background: var(--role-color, #0b6b63);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.18);
+}
+
+.dash-header-inner {
+  max-width: 1400px; margin: 0 auto;
+  padding: 12px 24px;
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+}
+
+.dash-brand {
+  display: flex; align-items: center; gap: 12px;
+  color: #fff; text-decoration: none;
+}
+
+.dash-brand-icon { font-size: 26px; }
+
+.dash-brand-title {
+  display: block;
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 17px; font-weight: 700; color: #fff; line-height: 1.1;
+}
+
+.dash-brand-role {
+  display: block;
+  font-size: 11.5px; font-weight: 500;
+  color: rgba(255,255,255,0.72); letter-spacing: 0.03em;
+}
+
+.dash-header-right {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+}
+
+.dash-user-name {
+  font-size: 13.5px; font-weight: 600; color: rgba(255,255,255,0.88);
+  max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+
+.dash-btn-secondary {
+  background: rgba(255,255,255,0.18); border: 1px solid rgba(255,255,255,0.40);
+  color: #fff; padding: 7px 14px; border-radius: 7px;
+  font-size: 13px; font-weight: 600; cursor: pointer;
+  transition: background 0.15s ease;
+}
+.dash-btn-secondary:hover { background: rgba(255,255,255,0.28); }
+
+.dash-btn-danger {
+  background: rgba(255,255,255,0.12); border: 1.5px solid rgba(255,255,255,0.35);
+  color: #fff; padding: 7px 14px; border-radius: 7px;
+  font-size: 13px; font-weight: 600; cursor: pointer;
+  transition: all 0.15s ease;
+}
+.dash-btn-danger:hover { background: rgba(239,68,68,0.70); border-color: transparent; }
+
+/* ---- Layout ---- */
+.dash-layout {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  min-height: calc(100vh - 58px);
+}
+
+.dash-sidebar {
+  background: #fff;
+  border-right: 1px solid #e5e9e8;
+  padding: 20px 0;
+  display: flex; flex-direction: column; gap: 2px;
+  position: sticky; top: 58px; height: calc(100vh - 58px); overflow-y: auto;
+}
+
+.dash-nav-link {
+  display: flex; align-items: center; gap: 10px;
+  padding: 11px 20px;
+  font-size: 13.5px; font-weight: 600;
+  color: #374151; text-decoration: none; cursor: pointer;
+  border-left: 3px solid transparent;
+  transition: all 0.15s ease;
+}
+.dash-nav-link:hover  { background: #f3f6f5; color: var(--role-color, #0b6b63); border-left-color: #d1ede9; }
+.dash-nav-link.active { background: #eef7f6; color: var(--role-color, #0b6b63); border-left-color: var(--role-color, #0b6b63); }
+
+.dash-main { padding: 32px 36px; background: #f7faf9; overflow-y: auto; }
+
+.dash-tab { display: block; }
+.dash-tab[hidden] { display: none; }
+
+.dash-page-title {
+  font-size: 24px; font-weight: 800;
+  color: #111827; margin-bottom: 24px;
+  letter-spacing: -0.02em;
+}
+
+/* ---- Stat Cards ---- */
+.stat-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 16px; margin-bottom: 28px;
+}
+
+.stat-card {
+  background: #fff;
+  border: 1px solid #e5e9e8; border-radius: 14px;
+  padding: 20px; display: flex; flex-direction: column; gap: 6px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+}
+
+.stat-num {
+  font-size: 32px; font-weight: 800; color: #111827; line-height: 1;
+}
+
+.stat-lbl {
+  font-size: 12px; font-weight: 600; color: #6b7280;
+  text-transform: uppercase; letter-spacing: 0.06em;
+}
+
+/* ---- Cards ---- */
+.dash-card {
+  background: #fff;
+  border: 1px solid #e5e9e8; border-radius: 14px;
+  padding: 24px; margin-bottom: 20px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+}
+
+.dash-card h3 { font-size: 16px; font-weight: 700; margin-bottom: 12px; }
+
+/* ---- Tables ---- */
+.dash-table {
+  width: 100%; border-collapse: collapse;
+  font-size: 13.5px; background: #fff;
+  border-radius: 10px; overflow: hidden;
+}
+
+.dash-table thead {
+  background: #f3f6f5;
+}
+
+.dash-table th {
+  padding: 10px 14px; text-align: left;
+  font-size: 11.5px; font-weight: 700;
+  letter-spacing: 0.06em; text-transform: uppercase;
+  color: #6b7280;
+}
+
+.dash-table td {
+  padding: 11px 14px;
+  border-top: 1px solid #f0f4f3;
+  color: #374151;
+}
+
+.dash-table tbody tr:hover { background: #fafcfb; }
+
+/* ---- List Rows ---- */
+.list-row {
+  background: #fff; border: 1px solid #e5e9e8;
+  border-radius: 10px; padding: 14px 18px;
+  margin-bottom: 10px; display: flex;
+  flex-direction: column; gap: 6px;
+}
+
+/* ---- Chips ---- */
+.chip {
+  display: inline-block; padding: 2px 10px; border-radius: 99px;
+  font-size: 11.5px; font-weight: 600; background: #f0f4f3; color: #374151;
+}
+.chip-applied      { background: #dbeafe; color: #1e40af; }
+.chip-under_review { background: #fef3c7; color: #92400e; }
+.chip-interview    { background: #d1fae5; color: #065f46; }
+.chip-selected     { background: #d1fae5; color: #065f46; }
+.chip-rejected     { background: #fee2e2; color: #991b1b; }
+.chip-active       { background: #d1fae5; color: #065f46; }
+.chip-pending      { background: #fef3c7; color: #92400e; }
+.chip-disabled     { background: #fee2e2; color: #991b1b; }
+
+.chip-role-student  { background: #d1fae5; color: #065f46; }
+.chip-role-employer { background: #dbeafe; color: #1e40af; }
+.chip-role-faculty  { background: #ede9fe; color: #5b21b6; }
+.chip-role-admin    { background: #fee2e2; color: #991b1b; }
+
+/* ---- Buttons ---- */
+.btn-sm { padding: 5px 10px; font-size: 12px; }
+
+.status-select {
+  padding: 5px 10px; border-radius: 6px;
+  border: 1px solid #d1d5db; font-size: 13px;
+  background: #fff; cursor: pointer;
+}
+
+/* ---- Notes ---- */
+.muted-note { font-size: 13px; color: #9ca3af; margin: 0; }
+.status-note { font-size: 14px; color: #374151; padding: 10px 0; }
+
+/* ---- Responsive ---- */
+@media (max-width: 900px) {
+  .dash-layout { grid-template-columns: 1fr; }
+  .dash-sidebar { position: static; height: auto; flex-direction: row; flex-wrap: wrap; padding: 10px; border-right: none; border-bottom: 1px solid #e5e9e8; }
+  .dash-nav-link { border-left: none; border-bottom: 2px solid transparent; padding: 8px 14px; }
+  .dash-nav-link.active { border-bottom-color: var(--role-color, #0b6b63); border-left: none; }
+  .dash-main { padding: 20px 16px; }
+}
